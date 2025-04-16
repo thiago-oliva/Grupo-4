@@ -19,6 +19,8 @@
 # En el b)
 
 - Inclusión o subtipo
+Usamos una variable del tipo general TipoDeViaje, pero le asignamos un tipo específico como ViajeDiesel
+"TipoDeViaje tipoDeViaje = new ViajeDiesel();"
 
 
  -  Paramétrico
