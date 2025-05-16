@@ -12,7 +12,7 @@ public class Tabla {
     private Map<String, Integer> mapaFilas;
     private Map<String, Integer> mapaColumnas;
 
-    public Tabla(String nombreTabla) {
+    public Tabla(String nombreTabla, List<Columna> columnas, List<String> etiquetasFilas, List<String> etiquetasColumnas, Map<String, Integer> mapaFilas, Map<String, Integer> mapaColumnas) {
         this.nombreTabla = nombreTabla;
         this.columnas = new ArrayList<>();
         this.etiquetasFilas = new ArrayList<>();
@@ -20,6 +20,31 @@ public class Tabla {
         this.mapaFilas = new HashMap<>();
         this.mapaColumnas = new HashMap<>();
     }
+
+    public int getCantidadColumnas() {
+        return columnas.size();
+    }
+
+    public int getCantidadfilas() {
+        return columnas.get(0).getCantidadFilas();
+    }
+
+    public List<String> getetiquetasFilas() {
+        return etiquetasFilas;
+    }
+
+    public List<String> getetiquetasColumnas() {
+        return etiquetasColumnas;
+    }
+
+
+
+
+
+
+
+
+
 
 
 }
