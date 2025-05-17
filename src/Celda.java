@@ -26,9 +26,10 @@ public class Celda {
         if (indice >= 0 && indice < valor.size()) {
             valor.set(indice, nuevoValor);
     else{
-                System.out.println("Índice fuera de rango.");}
+                System.out.println("Índice fuera de rango.");
+    }
 
-        }
+
 
 
     }
