@@ -9,26 +9,34 @@ public class Celda {
         this.valor = new ArrayList<>();
     }
 
+
     public List<Object>  getValor(){
-        return valor;
+        return valor
     }
 
     public void setValor(List<Object> valor) {
         this.valor = valor;
     }
 
+
     public void agregarValor(Object nuevoValor) {
         valor.add(nuevoValor);
     }
+    public void modificarValor(int indice, Object nuevoValor) {
+        if (indice >= 0 && indice < valor.size()) {
+            valor.set(indice, nuevoValor);
+    else{
+                System.out.println("Índice fuera de rango.");}
 
- //   public void modificarValor(int indice, Object nuevoValor) {
- //       if (indice >= 0 && indice < valor.size()) {
- //           valor.set(indice, nuevoValor);
- //       } else {
- //               System.out.println("Índice fuera de rango.");
- //       }
+        }
+
 
     }
+
+
+
+}
+
 
 
 }
