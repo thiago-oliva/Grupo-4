@@ -35,6 +35,10 @@ public class Columna {
         return celdas.size();
     }
 
+    public Object getValor(int filaIndex) { //Me busca el indice de la
+        return celdas.get(filaIndex).getValor();
+    }
+
     public Celda getCelda(int fila) {
         if (fila < 0 || fila >= celdas.size()) { 
             throw new IndexOutOfBoundsException("Índice de fila inválido: " + fila);
