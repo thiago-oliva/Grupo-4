@@ -13,6 +13,10 @@ public class Columna {
         CADENA
     }
 
+    public TipoDato getTipoDeDato() {
+        return tipo;
+    }
+
     public Columna(String nombre, TipoDato tipo) {
         this.nombre = nombre;
         this.tipo = tipo;

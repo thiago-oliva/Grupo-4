@@ -37,17 +37,35 @@ public class Tabla {
         return new ArrayList<>(columnas);
     }
 
-    public Celda getCelda(String etiquetaFila, String etiquetaColumna) {
-        int fila = mapaFilas.get(etiquetaFila);
-        int columna = mapaColumnas.get(etiquetaColumna);
-        return columnas.get(columna).getCelda(fila);
+
+    // Con este metodo, obtengo los tipos de datos de todas las columnas
+    public List<Columna.TipoDato> getTiposColumnas() {
+        List<Columna.TipoDato> tipos = new ArrayList<>();
+        for (Columna columna : columnas) {
+            tipos.add(columna.getTipoDeDato());
+        }
+        return tipos;
     }
 
-    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws Columna.excepcionTipoDato {
-        int fila = mapaFilas.get(etiquetaFila);
-        int columna = mapaColumnas.get(etiquetaColumna);
-        columnas.get(columna).setCelda(fila, valor);
+    // Con este metodo, obtengo el tipo de dato de una columna segun el nombre
+    public Columna.TipoDato getTipoColumna(String etiqueta) {
+        Integer index = mapaColumnas.get(etiqueta);
+        if (index == null) throw new RuntimeException("Columna no encontrada: " + etiqueta);
+        return columnas.get(index).getTipoDeDato();
     }
+//    public Celda getCelda(String etiquetaFila, String etiquetaColumna) {
+//        int fila = mapaFilas.get(etiquetaFila);
+//        int columna = mapaColumnas.get(etiquetaColumna);
+//        return columnas.get(columna).getCelda(fila);
+//    }
+
+//    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws Columna.excepcionTipoDato {
+//        int fila = mapaFilas.get(etiquetaFila);
+//        int columna = mapaColumnas.get(etiquetaColumna);
+//        columnas.get(columna).setCelda(fila, valor);
+
+
+
 
 
 }
