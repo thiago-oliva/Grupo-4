@@ -89,5 +89,3 @@ public class Tabla {
 //        columnas.get(columna).setCelda(fila, valor);
 
 }
-
-//quiero probar git
