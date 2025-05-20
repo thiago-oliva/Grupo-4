@@ -13,9 +13,11 @@ public class Columna {
         CADENA
     }
 
+
     public TipoDato getTipoDeDato() {
         return tipo;
     }
+
 
     public Columna(String nombre, TipoDato tipo) {
         this.nombre = nombre;
@@ -35,34 +37,36 @@ public class Columna {
         return celdas.size();
     }
 
+
     public Object getValor(int filaIndex) { //Me busca el indice de la
         return celdas.get(filaIndex).getValor();
     }
 
     public Celda getCelda(int fila) {
-        if (fila < 0 || fila >= celdas.size()) { 
+        if (fila < 0 || fila >= celdas.size()) {
             throw new IndexOutOfBoundsException("Índice de fila inválido: " + fila);
         }
         return celdas.get(fila);
     }
-    
+
+
     public void setCelda(int fila, Object valor) throws excepcionTipoDato {
         if (fila < 0 || fila >= celdas.size()) {
             throw new IndexOutOfBoundsException("Índice de fila fuera de rango.");
         }
         if (!esValorValido(valor)) {
-            throw new excepcionTipoDato("Valor incompatible con tipo de columna: " + tipo); 
+            throw new excepcionTipoDato("Valor incompatible con tipo de columna: " + tipo);
         }
         celdas.set(fila, new Celda(valor));
     }
 
     public void agregarCelda(Object valor) throws excepcionTipoDato {
-        if(!esValorValido(valor)) {
+        if (!esValorValido(valor)) {
             throw new excepcionTipoDato("Valor incompatible con tipo de columna: " + tipo);
         }
         celdas.add(new Celda(valor));
     }
-   
+
     private boolean esValorValido(Object valor) {
         if (valor == null) return true;
 

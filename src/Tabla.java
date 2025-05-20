@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map; //es una estructura que asocia una clave (K) con un valor (V).
+import java.util.Map;
 
 public class Tabla {
 
@@ -26,7 +26,7 @@ public class Tabla {
     }
 
     public List<String> getEtiquetasFilas() {
-        return new ArrayList<>(etiquetasFilas); 
+        return new ArrayList<>(etiquetasFilas); //devuelve una copia para que no modifiquen la original
     }
 
     public List<String> getEtiquetasColumnas() {
@@ -36,6 +36,7 @@ public class Tabla {
     public List<Columna> getColumnas() {
         return new ArrayList<>(columnas);
     }
+
 
 
     // Con este metodo, obtengo los tipos de datos de todas las columnas
@@ -87,8 +88,6 @@ public class Tabla {
 //        int columna = mapaColumnas.get(etiquetaColumna);
 //        columnas.get(columna).setCelda(fila, valor);
 
-
-
-
-
 }
+
+//quiero probar git
