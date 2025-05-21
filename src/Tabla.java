@@ -3,7 +3,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class Tabla {
+
 
     private String nombreTabla;
     private List<Columna> columnas;
@@ -11,6 +13,7 @@ public class Tabla {
     private List<String> etiquetasColumnas;
     private Map<String, Integer> mapaFilas;// Cada nombre de lista (por ejemplo "Nombre" o "Edad") está asociado a su posición (índice) en la lista filas
     private Map<String, Integer> mapaColumnas;//Igual que arriba
+
 
     public Tabla(String nombreTabla, List<Columna> columnas, List<String> etiquetasFilas, List<String> etiquetasColumnas, Map<String, Integer> mapaFilas, Map<String, Integer> mapaColumnas) {
         this.nombreTabla = nombreTabla;
@@ -21,17 +24,21 @@ public class Tabla {
         this.mapaColumnas = new HashMap<>(mapaColumnas);
     }
 
+
     public int getCantidadColumnas() {
         return columnas.size();
     }
+
 
     public List<String> getEtiquetasFilas() {
         return new ArrayList<>(etiquetasFilas); //devuelve una copia para que no modifiquen la original
     }
 
+
     public List<String> getEtiquetasColumnas() {
         return new ArrayList<>(etiquetasColumnas);
     }
+
 
     public List<Columna> getColumnas() {
         return new ArrayList<>(columnas);
@@ -39,12 +46,29 @@ public class Tabla {
 
 
 
-    // Con este metodo, obtengo los tipos de datos de todas las columnas
-    public List<Columna.TipoDato> getTiposColumnas() {
+
+
+
+    // Este metodo sirve para obtener el tipo de dato de una o mas columnas.
+    // Si se pasa null o lista vacía, devuelve los tipos de todas las columnas
+    public List<Columna.TipoDato> getTiposDeColumnas(List<String> etiquetas) {
         List<Columna.TipoDato> tipos = new ArrayList<>();
-        for (Columna columna : columnas) {
-            tipos.add(columna.getTipoDeDato());
+
+
+        if (etiquetas == null || etiquetas.isEmpty()) {
+            for (Columna columna : columnas) {
+                tipos.add(columna.getTipoDeDato());
+            }
+        } else {
+            for (String etiqueta : etiquetas) {
+                Integer index = mapaColumnas.get(etiqueta);
+                if (index == null)
+                    throw new IllegalArgumentException("Columna no encontrada: " + etiqueta);
+                tipos.add(columnas.get(index).getTipoDeDato());
+            }
         }
+
+
         return tipos;
     }
 
@@ -57,6 +81,7 @@ public class Tabla {
         }
         return columnas.get(indice).obtenerCeldas();
     }
+
 
     //Misma logica que en obtenerColumna, solo que con las etiquetas de las filas
     public List<Object> obtenerFila(String etiqueta) {
@@ -71,21 +96,44 @@ public class Tabla {
 
 
 
-    // Con este metodo, obtengo el tipo de dato de una columna segun el nombre
- //   public Columna.TipoDato getTipoColumna(String etiqueta) {
- //       Integer index = mapaColumnas.get(etiqueta);
- //       if (index == null) throw new RuntimeException("Columna no encontrada: " + etiqueta);
- //       return columnas.get(index).getTipoDeDato();
- //   }
-//    public Celda getCelda(String etiquetaFila, String etiquetaColumna) {
-//        int fila = mapaFilas.get(etiquetaFila);
-//        int columna = mapaColumnas.get(etiquetaColumna);
-//        return columnas.get(columna).getCelda(fila);
-//    }
+    //Devuelve una celda específica usando las etiquetas como referencia
+    public Celda getCelda(String etiquetaFila, String etiquetaColumna) {
+        int fila = mapaFilas.get(etiquetaFila);
+        int columna = mapaColumnas.get(etiquetaColumna);
+        return columnas.get(columna).getCelda(fila);
+    }
 
-//    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws Columna.excepcionTipoDato {
-//        int fila = mapaFilas.get(etiquetaFila);
-//        int columna = mapaColumnas.get(etiquetaColumna);
-//        columnas.get(columna).setCelda(fila, valor);
+
+    //Modifica el valor de una celda específica, accediendo por etiquetas
+    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws Columna.excepcionTipoDato {
+        int fila = mapaFilas.get(etiquetaFila);
+        int columna = mapaColumnas.get(etiquetaColumna);
+        columnas.get(columna).setCelda(fila, valor);
+    }
+
+
+    //SELECCIONAR PREGUNTAR
+
+
+    //devuelve una nueva tabla que contiene solo las primeras x filas de la tabla original.
+    public Tabla head(int x) {
+        int totalFilas = etiquetasFilas.size();
+        int limite = Math.min(x, totalFilas);
+        List<String> nuevasEtiquetasFilas = new ArrayList<>();
+        Map<String, Integer> nuevoMapaFilas = new HashMap<>();
+        for (int i = 0; i < limite; i++) {
+            String etiqueta = etiquetasFilas.get(i);
+            nuevasEtiquetasFilas.add(etiqueta);
+            nuevoMapaFilas.put(etiqueta, i);
+        }
+        List<Columna> nuevasColumnas = new ArrayList<>();
+        for (Columna columna : columnas) {
+            Columna nuevaColumna = columna.copiarFilas(limite);
+            nuevasColumnas.add(nuevaColumna);
+        }
+        List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
+        Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
+        return new Tabla(this.nombreTabla + "_head", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+    }
 
 }
