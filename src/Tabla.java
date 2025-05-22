@@ -158,7 +158,6 @@ public class Tabla {
         return new Tabla(this.nombreTabla + "_tail", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
     }
 
-    // crea una nueva tabla uniendo verticalmente las filas de esta tabla con las de otra tabla, siempre que ambas tengan las mismas columnas
     public Tabla concatenar(Tabla otra) {
         // Validar que tengan las mismas columnas y tipos (simplificado)
         if (this.columnas.size() != otra.getCantidadColumnas()) {
