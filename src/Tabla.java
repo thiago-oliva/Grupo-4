@@ -45,7 +45,7 @@ public class Tabla {
     }
 
     // Devuelve tipos de datos de columnas dadas (o todas si no se pasa lista/null)
-    public List<Columna.TipoDato> getTiposDeColumnas(List<String> etiquetas) {
+    public List<Columna.TipoDato> getTiposColumnas(List<String> etiquetas) {
         List<Columna.TipoDato> tipos = new ArrayList<>();
         if (etiquetas == null || etiquetas.isEmpty()) {
             // Si no se pasan etiquetas, devuelve los tipos de todas las columnas
@@ -158,6 +158,7 @@ public class Tabla {
         return new Tabla(this.nombreTabla + "_tail", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
     }
 
+    // crea una nueva tabla uniendo verticalmente las filas de esta tabla con las de otra tabla, siempre que ambas tengan las mismas columnas
     public Tabla concatenar(Tabla otra) {
         // Validar que tengan las mismas columnas y tipos (simplificado)
         if (this.columnas.size() != otra.getCantidadColumnas()) {
