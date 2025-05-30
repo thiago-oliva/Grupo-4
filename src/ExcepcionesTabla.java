@@ -13,9 +13,8 @@ public class ExcepcionesTabla {
 
     // Para índices inválidos
     public static class ExcepcionIndiceInvalido extends ExcepcionTabla {
-        public ExcepcionIndiceInvalido(String tipo, int indice, int rangoMaximo) {
-            super(String.format("[%s] Índice %d fuera de rango (máximo: %d)", 
-                tipo.toUpperCase(), indice, rangoMaximo));
+        public ExcepcionIndiceInvalido(int indice) {
+            super(String.format("[%s] Índice %d fuera de rango (máximo: %d)", indice));
         }
     }
 

@@ -45,9 +45,9 @@ public class Columna {
         return celdas.get(filaIndex).getValor();
     }
 
-    public Celda getCelda(int fila) {
+    public Celda getCelda(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
-            throw new IndexOutOfBoundsException("Índice de fila inválido: " + fila);
+            throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
         }
         return celdas.get(fila);
     }
