@@ -52,19 +52,20 @@ public class Columna {
         return celdas.get(fila);
     }
 
-    public void setCelda(int fila, Object valor) throws excepcionTipoDato {
+    public void setCelda(int fila, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato,
+            ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
-            throw new IndexOutOfBoundsException("Índice de fila fuera de rango.");
+            throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
         }
         if (!esValorValido(valor)) {
-            throw new excepcionTipoDato("Valor incompatible con tipo de columna: " + tipo);
+            throw new ExcepcionesTabla.ExcepcionTipoDato(tipo, valor);
         }
         celdas.set(fila, new Celda(valor));
     }
 
-    public void agregarCelda(Object valor) throws excepcionTipoDato {
+    public void agregarCelda(Object valor) throws ExcepcionesTabla.ExcepcionTipoDato {
         if (!esValorValido(valor)) {
-            throw new excepcionTipoDato("Valor incompatible con tipo de columna: " + tipo);
+            throw new ExcepcionesTabla.ExcepcionTipoDato(tipo, valor);
         }
         celdas.add(new Celda(valor));
     }
@@ -83,21 +84,15 @@ public class Columna {
         }
     }
 
-    public void eliminarFila(int fila) {
+    public void eliminarFila(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido{
         if (fila < 0 || fila >= celdas.size()) {
-            throw new IndexOutOfBoundsException("Índice de fila inválido: " + fila);
+            throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
         }
         celdas.remove(fila);
     }
 
     public List<Celda> obtenerCeldas() {
         return celdas;
-    }
-
-    public static class excepcionTipoDato extends Exception {
-        public excepcionTipoDato(String mensaje) {
-            super(mensaje);
-        }
     }
 
     //crea una nueva columna que contiene solo las primeras limite filas (celdas) de la columna original.
@@ -119,13 +114,13 @@ public class Columna {
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
     }
 
-    public Columna copiarFilasPorIndices(List<Integer> indices) {
+    public Columna copiarFilasPorIndices(List<Integer> indices) throws ExcepcionesTabla.ExcepcionIndiceInvalido{
         List<Celda> nuevasCeldas = new ArrayList<>();
         for (int i : indices) {
             if (i >= 0 && i < celdas.size()) {
                 nuevasCeldas.add(new Celda(celdas.get(i).getValor()));
             } else {
-                throw new IndexOutOfBoundsException("Índice inválido: " + i);
+                throw new ExcepcionesTabla.ExcepcionIndiceInvalido(i);
             }
         }
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
