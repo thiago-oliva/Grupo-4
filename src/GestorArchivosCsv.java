@@ -16,7 +16,7 @@ public class GestorArchivosCSV {
         try {
             Files.lines(archivo).forEach(linea -> {
                 List<String> fila = Arrays.asList(linea.split(","));
-                tabla.agregarFila(fila);
+                Tabla.agregarFila(fila);
             });
         } catch (IOException e) {
             e.printStackTrace();

@@ -18,23 +18,12 @@ public class Columna {
         this.celdas = new ArrayList<>(celdas);
     }
 
-
-    public enum TipoDato {
-        NUMERICO,
-        BOOLEANO,
-        CADENA
-    }
-
     public TipoDato getTipoDeDato() {
         return tipo;
     }
 
     public String getNombre() {
         return nombre;
-    }
-
-    public TipoDato getTipo() {
-        return tipo;
     }
 
     public int getCantidadFilas() {
