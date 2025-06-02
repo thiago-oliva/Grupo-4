@@ -3,8 +3,8 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido, ExcepcionesTabla.ExcepcionColumnasIncompatibles {
 
-        List<Celda> Nombre = Arrays.asList(new Celda("Ana"), new Celda("Luis"), new Celda("Eva"));
-        List<Celda> Edad = Arrays.asList(new Celda(25), new Celda(30), new Celda(22));
+        List<Celda> Nombre = Arrays.asList(new Celda("fran"), new Celda("dante"), new Celda("thiago"));
+        List<Celda> Edad = Arrays.asList(new Celda(20), new Celda(1), new Celda(20));
 
         Columna colNombre = new Columna("Nombre", TipoDato.CADENA, Nombre);
         Columna colEdad = new Columna("Edad", TipoDato.NUMERICO, Edad);
