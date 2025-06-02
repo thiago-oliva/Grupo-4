@@ -40,13 +40,14 @@ public class Tabla {
     }
 
     // Devuelve copia de la lista de columnas
-    public List<Columna> getColumnas() {
+    public List<Columna> getColumnas()
+    {
         return new ArrayList<>(columnas);
     }
 
     // Devuelve tipos de datos de columnas dadas (o todas si no se pasa lista/null)
-    public List<Columna.TipoDato> getTiposColumnas(List<String> etiquetas) {
-        List<Columna.TipoDato> tipos = new ArrayList<>();
+    public List<TipoDato> getTiposColumnas(List<String> etiquetas) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada{
+        List<TipoDato> tipos = new ArrayList<>();
         if (etiquetas == null || etiquetas.isEmpty()) {
             // Si no se pasan etiquetas, devuelve los tipos de todas las columnas
             for (Columna columna : columnas) {
@@ -57,7 +58,7 @@ public class Tabla {
             for (String etiqueta : etiquetas) {
                 Integer index = mapaColumnas.get(etiqueta);
                 if (index == null)
-                    throw new IllegalArgumentException("Columna no encontrada: " + etiqueta);
+                    throw new ExcepcionesTabla.ExcepcionColumnaNoEncontrada(etiqueta);
                 tipos.add(columnas.get(index).getTipoDeDato());
             }
         }
@@ -65,10 +66,10 @@ public class Tabla {
     }
 
     // Devuelve una columna completa (lista de valores) a partir de su etiqueta
-    public List<Celda> obtenerColumna(String etiqueta) {
+    public List<Celda> obtenerColumna(String etiqueta) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada {
         Integer indice = mapaColumnas.get(etiqueta); //Obtiene el indice de la columna con mapaColumnas
         if (indice == null) {
-            throw new IllegalArgumentException("No existe una columna con etiqueta: " + etiqueta);
+            throw new ExcepcionesTabla.ExcepcionColumnaNoEncontrada(etiqueta);
         }
         return columnas.get(indice).obtenerCeldas();
     }
@@ -84,14 +85,14 @@ public class Tabla {
     }
 
     // Devuelve una celda específica dada la etiqueta de fila y columna
-    public Celda getCelda(String etiquetaFila, String etiquetaColumna) {
+    public Celda getCelda(String etiquetaFila, String etiquetaColumna) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         int fila = mapaFilas.get(etiquetaFila);
         int columna = mapaColumnas.get(etiquetaColumna);
         return columnas.get(columna).getCelda(fila);
     }
 
     // Modifica el valor de una celda específica (accedida por etiquetas)
-    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws Columna.excepcionTipoDato {
+    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
         int fila = mapaFilas.get(etiquetaFila);
         int columna = mapaColumnas.get(etiquetaColumna);
         columnas.get(columna).setCelda(fila, valor);
@@ -158,111 +159,122 @@ public class Tabla {
         return new Tabla(this.nombreTabla + "_tail", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
     }
 
-    public Tabla concatenar(Tabla otra) {
-        // Validar que tengan las mismas columnas y tipos (simplificado)
+    // Crea una nueva tabla uniendo verticalmente las filas de esta tabla con las de otra tabla, siempre que ambas
+    // tengan las mismas columnas
+    public Tabla concatenar(Tabla otra) throws ExcepcionesTabla.ExcepcionColumnasIncompatibles {
+        // Validar que tengan la misma cantidad de columnas
         if (this.columnas.size() != otra.getCantidadColumnas()) {
-            throw new IllegalArgumentException("Las tablas tienen diferente cantidad de columnas");
+            throw new ExcepcionesTabla.ExcepcionColumnasIncompatibles(this.columnas.size() + " vs " +
+                    otra.getCantidadColumnas());
         }
+
+        // Validar que nombres y tipos de columnas coincidan
         for (int i = 0; i < columnas.size(); i++) {
-            if (!this.columnas.get(i).getNombre().equals(otra.getColumnas().get(i).getNombre()) ||
-                    this.columnas.get(i).getTipo() != otra.getColumnas().get(i).getTipo()) {
-                throw new IllegalArgumentException("Las columnas no coinciden en nombre o tipo");
+            Columna col1 = this.columnas.get(i);
+            Columna col2 = otra.getColumnas().get(i);
+
+            if (!col1.getNombre().equals(col2.getNombre()) ||
+                    col1.getTipoDeDato() != col2.getTipoDeDato()) {
+                throw new ExcepcionesTabla.ExcepcionColumnasIncompatibles(
+                        String.format("Columna %d: '%s' (%s) vs '%s' (%s)",
+                                i, col1.getNombre(), col1.getTipoDeDato(),
+                                col2.getNombre(), col2.getTipoDeDato()));
             }
         }
 
-        // Nuevas listas para construir la tabla resultante
+        // Crear nuevas listas
         List<Columna> nuevasColumnas = new ArrayList<>();
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
 
-        // Construir nuevas etiquetas filas y mapa filas (concatenadas)
+        // Combinar etiquetas de filas
         nuevasEtiquetasFilas.addAll(this.etiquetasFilas);
         nuevasEtiquetasFilas.addAll(otra.getEtiquetasFilas());
+
         for (int i = 0; i < nuevasEtiquetasFilas.size(); i++) {
             nuevoMapaFilas.put(nuevasEtiquetasFilas.get(i), i);
         }
 
-        // Para cada columna, concatenar las celdas de ambas tablas
+        // Concatenar columnas
         for (int i = 0; i < columnas.size(); i++) {
-            Columna colThis = this.columnas.get(i);
-            Columna colOtra = otra.getColumnas().get(i);
+            Columna col1 = this.columnas.get(i);
+            Columna col2 = otra.getColumnas().get(i);
 
             List<Celda> celdasConcatenadas = new ArrayList<>();
-            celdasConcatenadas.addAll(colThis.obtenerCeldas());
-            celdasConcatenadas.addAll(colOtra.obtenerCeldas());
+            celdasConcatenadas.addAll(col1.obtenerCeldas());
+            celdasConcatenadas.addAll(col2.obtenerCeldas());
 
-            // Crear nueva columna con las celdas concatenadas
-            Columna nuevaColumna = new Columna(colThis.getNombre(), colThis.getTipo(), new ArrayList<>());
-
-            // Agregar celdas usando try-catch para manejar excepciones
-            for (Celda celda : celdasConcatenadas) {
-                try {
-                    nuevaColumna.agregarCelda(celda.getValor());
-                } catch (Columna.excepcionTipoDato e) {
-                    System.out.println("Error al agregar celda en concatenar: " + e.getMessage());
-                }
-            }
+            // Crear nueva columna con las celdas
+            Columna nuevaColumna = new Columna(col1.getNombre(), col1.getTipoDeDato(), celdasConcatenadas);
             nuevasColumnas.add(nuevaColumna);
         }
 
-        // Las columnas y su mapa se mantienen igual (mismo orden y nombres)
+        // Las columnas y su mapa se mantienen
         List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
 
-        return new Tabla(this.nombreTabla + "_concatenada", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+        // Crear nueva tabla
+        return new Tabla(
+                this.nombreTabla + "_concatenada",
+                nuevasColumnas,
+                nuevasEtiquetasFilas,
+                nuevasEtiquetasColumnas,
+                nuevoMapaFilas,
+                nuevoMapaColumnas
+        );
     }
 
     // Recibe el nombre de la columna a filtrar y un predicado (condición) para filtrar los valores
     // Devuelve una nueva tabla con solo las filas donde la condición se cumple en esa columna.
-    public Tabla filtrarColumna(String nombreColumna, Predicate<Object> condicion) {
+    public Tabla filtrarColumna(String nombreColumna, Predicate<Object> condicion)
+            throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionTipoDato {
+
         // Buscar índice de la columna que se va a filtrar
         Integer indiceColumna = mapaColumnas.get(nombreColumna);
         if (indiceColumna == null) {
-            throw new IllegalArgumentException("La columna " + nombreColumna + " no existe.");
+            throw new ExcepcionesTabla.ExcepcionColumnaNoEncontrada(nombreColumna);
         }
 
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
         List<Columna> nuevasColumnas = new ArrayList<>();
 
-        // Construye nuevas listas de celdas para cada columna, pero solo con filas que cumplen la condicion
-
-        // Primero obtenemos las columnas originales para recorrerlas por índice
+        // Crear columnas vacías correspondientes a cada columna original
         for (Columna columna : columnas) {
-            // Creamos listas vacías para las celdas filtradas
-            nuevasColumnas.add(new Columna(columna.getNombre(), columna.getTipo(), new ArrayList<>()));
+            nuevasColumnas.add(new Columna(columna.getNombre(), columna.getTipoDeDato(), new ArrayList<>()));
         }
 
-        // Iterar sobre cada fila
         int nuevoIndiceFila = 0;
         for (int i = 0; i < etiquetasFilas.size(); i++) {
-            // Obtenemos el valor de la columna a filtrar en la fila i
             Object valor = columnas.get(indiceColumna).getValor(i);
-            if (condicion.test(valor)) {  // Si cumple la condición
-                // Añadir etiqueta y mapa
+
+            if (condicion.test(valor)) {
                 String etiquetaFila = etiquetasFilas.get(i);
                 nuevasEtiquetasFilas.add(etiquetaFila);
                 nuevoMapaFilas.put(etiquetaFila, nuevoIndiceFila);
 
-                // Agregar la celda correspondiente de cada columna para esta fila
                 for (int j = 0; j < columnas.size(); j++) {
                     Columna colOriginal = columnas.get(j);
                     Columna colNueva = nuevasColumnas.get(j);
-                    try {
-                        colNueva.agregarCelda(colOriginal.getValor(i));
-                    } catch (Columna.excepcionTipoDato e) {
-                        // Esto no debería pasar si el tipo es correcto, pero lo capturamos por si acaso
-                        System.out.println("Error al agregar celda en filtrarColumna: " + e.getMessage());
-                    }
+                    colNueva.agregarCelda(colOriginal.getValor(i)); // Puede lanzar ExcepcionTipoDato
                 }
+
                 nuevoIndiceFila++;
             }
         }
-        // Las etiquetas y mapa de columnas no cambian
+
+        // Las etiquetas de columnas y mapa de columnas se mantienen
         List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
 
-        return new Tabla(this.nombreTabla + "_filtrado", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+        return new Tabla(
+                this.nombreTabla + "_filtrado",
+                nuevasColumnas,
+                nuevasEtiquetasFilas,
+                nuevasEtiquetasColumnas,
+                nuevoMapaFilas,
+                nuevoMapaColumnas
+        );
     }
 
     // Recibe un Predicate<List<Object>> que representa la condición aplicada a toda la fila (lista de valores de esa fila).
@@ -274,7 +286,8 @@ public class Tabla {
 
         // Inicializar nuevas columnas vacías (con mismo nombre y tipo)
         for (Columna columna : columnas) {
-            nuevasColumnas.add(new Columna(columna.getNombre(), columna.getTipo(), new ArrayList<>()));
+            // Cambié columna.getTipo() por columna.getTipoDeDato() para coincidir con tu diseño
+            nuevasColumnas.add(new Columna(columna.getNombre(), columna.getTipoDeDato(), new ArrayList<>()));
         }
 
         int nuevoIndiceFila = 0;
@@ -299,7 +312,7 @@ public class Tabla {
                     Columna colNueva = nuevasColumnas.get(j);
                     try {
                         colNueva.agregarCelda(colOriginal.getValor(i));
-                    } catch (Columna.excepcionTipoDato e) {
+                    } catch (ExcepcionesTabla.ExcepcionTipoDato e) {
                         System.out.println("Error al agregar celda en filtrarFilas: " + e.getMessage());
                     }
                 }
@@ -336,9 +349,8 @@ public class Tabla {
 
     // Devuelve una nueva tabla con n filas elegidas al azar (sin reemplazo) de la tabla original.
     // Usa la clase Columna para copiar solo las filas correspondientes a las filas seleccionadas.
-    public Tabla muestreoAleatorio(int n) {
+    public Tabla muestreoAleatorio(int n) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         int totalFilas = etiquetasFilas.size();
-
         if (n <= 0) {
             throw new IllegalArgumentException("El número de filas a muestrear debe ser positivo.");
         }
@@ -346,22 +358,22 @@ public class Tabla {
             throw new IllegalArgumentException("El número de filas a muestrear no puede ser mayor que el total de filas.");
         }
 
-        // Crear una lista con todos los índices de filas
+        // Crear lista con todos los índices de filas (0 a totalFilas-1)
         List<Integer> indicesFilas = new ArrayList<>();
         for (int i = 0; i < totalFilas; i++) {
             indicesFilas.add(i);
         }
 
-        // Mezclar aleatoriamente
+        // Mezclar aleatoriamente la lista de índices
         Collections.shuffle(indicesFilas, new Random());
 
-        // Tomar solo las primeras n posiciones
+        // Tomar los primeros n índices para el muestreo
         List<Integer> indicesSeleccionados = indicesFilas.subList(0, n);
 
-        // Ordenar para mantener el orden original de filas
+        // Ordenar para mantener el orden original de las filas seleccionadas
         Collections.sort(indicesSeleccionados);
 
-        // Crear nuevas etiquetas de filas y mapa filas
+        // Construir nuevas etiquetas de filas y mapa de filas con las seleccionadas
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
         for (int i = 0; i < indicesSeleccionados.size(); i++) {
@@ -371,17 +383,25 @@ public class Tabla {
             nuevoMapaFilas.put(etiqueta, i);
         }
 
-        // Copiar columnas con las filas seleccionadas
+        // Crear nuevas columnas copiando solo las filas seleccionadas
         List<Columna> nuevasColumnas = new ArrayList<>();
         for (Columna columna : columnas) {
             nuevasColumnas.add(columna.copiarFilasPorIndices(indicesSeleccionados));
         }
 
-        // Reutilizar etiquetas y mapa columnas
+        // Las etiquetas y mapa de columnas permanecen igual
         List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
 
-        return new Tabla(this.nombreTabla + "_muestreoAleatorio", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+        // Devolver nueva tabla con muestreo aleatorio
+        return new Tabla(
+                this.nombreTabla + "_muestreoAleatorio",
+                nuevasColumnas,
+                nuevasEtiquetasFilas,
+                nuevasEtiquetasColumnas,
+                nuevoMapaFilas,
+                nuevoMapaColumnas
+        );
     }
 
     // Imprime por consola una representación tabular simple, mostrando las etiquetas de columnas arriba y
@@ -405,6 +425,7 @@ public class Tabla {
                 System.out.print(valor + "\t");
             }
             System.out.println();
+
         }
     }
 }

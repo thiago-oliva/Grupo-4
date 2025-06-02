@@ -13,26 +13,52 @@ public class ExcepcionesTabla {
 
     // Para índices inválidos
     public static class ExcepcionIndiceInvalido extends ExcepcionTabla {
-        public ExcepcionIndiceInvalido(String tipo, int indice, int rangoMaximo) {
-            super(String.format("[%s] Índice %d fuera de rango (máximo: %d)", 
-                tipo.toUpperCase(), indice, rangoMaximo));
+        public ExcepcionIndiceInvalido(int indice) {
+            super(String.format("Índice fuera de rango: %d", indice));
+        }
+    }
+
+    // Para cuando no se encuentra una fila
+    public static class ExcepcionFilaNoEncontrada extends ExcepcionTabla {
+        public ExcepcionFilaNoEncontrada(String etiqueta) {
+            super(String.format("Fila no encontrada: '%s'", etiqueta));
         }
     }
 
     // Para tipos de datos incorrectos
     public static class ExcepcionTipoDato extends ExcepcionTabla {
-        public ExcepcionTipoDato(Columna.TipoDato tipoEsperado, Object valorRecibido) {
+        public ExcepcionTipoDato(TipoDato tipoEsperado, Object valorRecibido) {
             super(String.format("Tipo inválido. Esperado: %s, Recibido: %s",
                 tipoEsperado,
                 valorRecibido != null ? valorRecibido.getClass().getSimpleName() : "null"));
         }
     }
 
-    // Para longitud incorrecta en columnas
+    // Para cuando no se encuentra una columna
+    public static class ExcepcionColumnaNoEncontrada extends ExcepcionTabla {
+        public ExcepcionColumnaNoEncontrada(String columna) {
+            super(String.format("Columna no encontrada: '%s'", columna));
+        }
+    }
+
+    // Para el error de la cantidad de filas en una columna
     public static class ExcepcionLongitudColumna extends ExcepcionTabla {
-        public ExcepcionLongitudColumna(String columna, int longitudEsperada, int longitudRecibida) {
-            super(String.format("[COLUMNA '%s'] Longitud incorrecta. Esperada: %d, Recibida: %d",
-                columna, longitudEsperada, longitudRecibida));
+        public ExcepcionLongitudColumna(String columna) {
+            super(String.format("Longitud incorrecta en columna '%s'", columna));
+        }
+    }
+
+    // Para señalar un error entre dos tablas que queres concatenar y sus columnas no son compatibles
+    public static class ExcepcionColumnasIncompatibles extends ExcepcionTabla {
+        public ExcepcionColumnasIncompatibles(String detalle) {
+            super("Columnas incompatibles: " + detalle);
+        }
+    }
+
+    // Para expresiones de filtrado mal formadas(si intentan ordenar por una columna que no existe o incompatible)
+    public static class ExcepcionFiltroInvalido extends ExcepcionTabla {
+        public ExcepcionFiltroInvalido(String mensaje) {
+            super("Filtro inválido: " + mensaje);
         }
     }
 

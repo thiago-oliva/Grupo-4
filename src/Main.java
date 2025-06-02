@@ -4,9 +4,10 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Arrays;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 
 public class GestorArchivosCSV {
-
     public GestorArchivosCSV() {
 
     }
@@ -15,8 +16,8 @@ public class GestorArchivosCSV {
         Path archivo = Paths.get(ruta);
         try {
             Files.lines(archivo).forEach(linea -> {
-                List<String> fila = Arrays.asList(linea.split(","));
-                tabla.agregarFila(fila);
+                List<Object> fila = Arrays.asList(linea.split(","));
+                Tabla.agregarFila(fila); // Crear metodo agregarFila en clase Tabla
             });
         } catch (IOException e) {
             e.printStackTrace();
