@@ -73,7 +73,7 @@ public class Columna {
         }
     }
 
-    public void eliminarFila(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido{
+    public void eliminarFila(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
             throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
         }
@@ -103,7 +103,7 @@ public class Columna {
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
     }
 
-    public Columna copiarFilasPorIndices(List<Integer> indices) throws ExcepcionesTabla.ExcepcionIndiceInvalido{
+    public Columna copiarFilasPorIndices(List<Integer> indices) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         List<Celda> nuevasCeldas = new ArrayList<>();
         for (int i : indices) {
             if (i >= 0 && i < celdas.size()) {
