@@ -425,6 +425,7 @@ public class Tabla {
                 System.out.print(valor + "\t");
             }
             System.out.println();
+
         }
     }
 }

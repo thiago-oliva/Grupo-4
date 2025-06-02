@@ -1,34 +1,47 @@
-import java.util.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Arrays;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-public class Main {
-    public static void main(String[] args) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido, ExcepcionesTabla.ExcepcionColumnasIncompatibles {
 
-        List<Celda> Nombre = Arrays.asList(new Celda("fran"), new Celda("dante"), new Celda("thiago"));
-        List<Celda> Edad = Arrays.asList(new Celda(20), new Celda(1), new Celda(20));
+public class GestorArchivosCSV {
+    public GestorArchivosCSV() {
 
-        Columna colNombre = new Columna("Nombre", TipoDato.CADENA, Nombre);
-        Columna colEdad = new Columna("Edad", TipoDato.NUMERICO, Edad);
+    }
 
-        List<Columna> columnas = Arrays.asList(colNombre, colEdad);
-        List<String> etiquetasFilas = Arrays.asList("fila1", "fila2", "fila3");
-        List<String> etiquetasColumnas = Arrays.asList("Nombre", "Edad");
+    public void leerCsv(String ruta) {
+        Path archivo = Paths.get(ruta);
+        try {
+            Files.lines(archivo).forEach(linea -> {
+                List<Object> fila = Arrays.asList(linea.split(","));
+                Tabla.agregarFila(fila); // Crear metodo agregarFila en clase Tabla
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-        Map<String, Integer> mapaFilas = new HashMap<>();
-        mapaFilas.put("fila1", 0);
-        mapaFilas.put("fila2", 1);
-        mapaFilas.put("fila3", 2);
+    public void guardarEnCsv(Tabla tabla, String ruta) {
+        Path direccion = Paths.get(ruta);
+        StringBuilder contenido = new StringBuilder();
 
-        Map<String, Integer> mapaColumnas = new HashMap<>();
-        mapaColumnas.put("Nombre", 0);
-        mapaColumnas.put("Edad", 1);
+        for (List<String> fila : tabla.getFilas()) {
+            contenido.append(String.join(",", fila));
+            contenido.append(System.lineSeparator());
+        }
 
-        Tabla tabla = new Tabla("Personas", columnas, etiquetasFilas, etiquetasColumnas, mapaFilas, mapaColumnas);
+        try { //ver clase excepciones
+            Files.write(direccion, contenido.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            System.err.println("Error al guardar el archivo: " + e.getMessage());
+        }
+    }
 
-        tabla.mostrar();
 
-        tabla.head(2).mostrar();
-
-        Tabla filtrada = tabla.filtrarColumna("Edad", valor -> (Integer) valor > 23);
-        filtrada.mostrar();
+    public void getMapa(Tabla tabla){
+//despues
     }
 }
