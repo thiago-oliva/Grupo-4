@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 
-public class Columna {
+public class Columna implements NAs {
     private String nombre;
     private TipoDato tipo;
     private List<Celda> celdas;
@@ -120,8 +120,47 @@ public class Columna {
     }
 
     // Para manejar los valores faltantes
-    public interface NAs {
-        boolean esNA(Object valor); // Para verificar si un valor es NA
-        void imputar(Object valor); // Reemplaza todos los NA por el valor dado
+    //public interface NAs {
+      //  boolean esNA(Object valor); // Para verificar si un valor es NA
+        //void imputar(Object valor); // Reemplaza todos los NA por el valor dado
+    //}
+    @Override
+    public void leerNAs(Tabla tabla) {
+        for (Columna columna : tabla.getColumnas()) {
+            for (int i = 0; i < columna.getCantidadFilas(); i++) {
+                Object valor = columna.getValor(i);
+                if (valor == null || "NA".equals(valor) || "".equals(valor)) {
+                    System.out.println("NA encontrado en columna '" + columna.getNombre() + "', fila " + i);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void mostrarNAs(Tabla tabla) {
+        for (Columna columna : tabla.getColumnas()) {
+            for (int i = 0; i < columna.getCantidadFilas(); i++) {
+                Object valor = columna.getValor(i);
+                if (valor == null || "NA".equals(valor) || "".equals(valor)) {
+                    System.out.println("NA encontrado en columna '" + columna.getNombre() + "', fila " + i);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
+        for (Columna columna : tabla.getColumnas()) {
+            for (int i = 0; i < columna.getCantidadFilas(); i++) {
+                Object celdaValor = columna.getValor(i);
+                if (celdaValor == null || "NA".equals(celdaValor) || "".equals(celdaValor)) {
+                    if (!columna.esValorValido(valor)) {
+                        throw new ExcepcionesTabla.ExcepcionTipoDato(columna.getTipoDeDato(), valor);
+                    }
+                    columna.setCelda(i, valor);
+                }
+            }
+        }
     }
 }
+
