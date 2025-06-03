@@ -578,5 +578,42 @@ public class Tabla implements Manipular, NAs {
         }
     }
 
+    public List<List<Celda>> seleccionar(List<String> nombresColumnas, List<Integer> indicesFilas) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido{
+        List<List<Celda>> vista = new ArrayList<>();
+        List<Columna> columnasSeleccionadas = new ArrayList<>();
+
+        for (String nombre : nombresColumnas) {
+            boolean encontrada = false;
+            for (Columna col : columnas) {
+                if (col.getNombre().equals(nombre)) {
+                    columnasSeleccionadas.add(col);
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (!encontrada) {
+                throw new ExcepcionesTabla.ExcepcionColumnaNoEncontrada(nombre);
+            }
+        }
+
+        int cantidadFilas = columnas.get(0).getCeldas().size();
+
+        for (Integer filaIndex : indicesFilas) {
+            if (filaIndex < 0 || filaIndex >= cantidadFilas) {
+                throw new ExcepcionesTabla.ExcepcionIndiceInvalido(filaIndex);
+            }
+
+            List<Celda> filaVista = new ArrayList<>();
+            for (Columna col : columnasSeleccionadas) {
+                filaVista.add(col.getCeldas().get(filaIndex));
+            }
+            vista.add(filaVista);
+        }
+
+        return vista;
+    }
+
+
+
 
 }
