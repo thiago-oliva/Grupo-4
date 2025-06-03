@@ -6,8 +6,7 @@ import java.util.Random;
 import java.util.List;
 import java.util.Map;
 
-
-public class Tabla {
+public class Tabla implements Manipular, NAs {
     private String nombreTabla;
     private List<Columna> columnas;
     private List<String> etiquetasFilas;
@@ -74,15 +73,71 @@ public class Tabla {
         return columnas.get(indice).obtenerCeldas();
     }
 
-    // Devuelve una fila completa (lista de valores) a partir de su etiqueta
-    public List<Object> obtenerFila(String etiqueta) {
-        Integer filaIndex = mapaFilas.get(etiqueta);
+    @Override
+    public List<Object> obtenerFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada {
+        if (!mapaFilas.containsKey(etiqueta)) {
+            throw new ExcepcionesTabla.ExcepcionFilaNoEncontrada(etiqueta);
+        }
+        int indexFila = mapaFilas.get(etiqueta);
         List<Object> fila = new ArrayList<>();
         for (Columna col : columnas) {
-            fila.add(col.getValor(filaIndex));
+            fila.add(col.getValor(indexFila));
         }
         return fila;
     }
+
+    @Override
+    public void eliminarFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada {
+        if (!mapaFilas.containsKey(etiqueta)) {
+            throw new ExcepcionesTabla.ExcepcionFilaNoEncontrada(etiqueta);
+        }
+        int indexFila = mapaFilas.get(etiqueta);
+
+        for (Columna col : columnas) {
+            try {
+                col.eliminarFila(indexFila);
+            } catch (ExcepcionesTabla.ExcepcionIndiceInvalido e) {
+                throw new RuntimeException("Error al eliminar fila en columna: " + col.getNombre(), e);
+            }
+        }
+            etiquetasFilas.remove(indexFila);
+        mapaFilas.clear();
+        for (int i = 0; i < etiquetasFilas.size(); i++) {
+            mapaFilas.put(etiquetasFilas.get(i), i);
+        }
+    }
+
+    @Override
+    public void insertarColumna(int indice, List<String> nuevaColumna) throws ExcepcionesTabla.ExcepcionLongitudColumna {
+        if (!columnas.isEmpty() && nuevaColumna.size() != columnas.get(0).getCantidadFilas()) {
+            throw new ExcepcionesTabla.ExcepcionLongitudColumna("ColumnaNueva");
+        }
+        List<Celda> celdas = new ArrayList<>();
+        for (String val : nuevaColumna) {
+            celdas.add(new Celda(val));
+        }
+
+        Columna nueva = new Columna("ColumnaNueva", TipoDato.CADENA, celdas); // o definir TipoDato dinámicamente
+        columnas.add(indice, nueva);
+        etiquetasColumnas.add(indice, "ColumnaNueva");
+
+        mapaColumnas.clear();
+        for (int i = 0; i < etiquetasColumnas.size(); i++) {
+            mapaColumnas.put(etiquetasColumnas.get(i), i);
+        }
+    }
+
+    @Override
+    public void eliminarColumna(int indice) {
+        columnas.remove(indice);
+        etiquetasColumnas.remove(indice);
+
+        mapaColumnas.clear();
+        for (int i = 0; i < etiquetasColumnas.size(); i++) {
+            mapaColumnas.put(etiquetasColumnas.get(i), i);
+        }
+    }
+
 
     // Devuelve una celda específica dada la etiqueta de fila y columna
     public Celda getCelda(String etiquetaFila, String etiquetaColumna) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
@@ -226,7 +281,7 @@ public class Tabla {
 
     // Recibe el nombre de la columna a filtrar y un predicado (condición) para filtrar los valores
     // Devuelve una nueva tabla con solo las filas donde la condición se cumple en esa columna.
-    public Tabla filtrarColumna(String nombreColumna, Predicate<Object> condicion)
+    public Tabla filtrarColumnas(String nombreColumna, Predicate<Object> condicion)
             throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionTipoDato {
 
         // Buscar índice de la columna que se va a filtrar
@@ -426,6 +481,99 @@ public class Tabla {
             }
             System.out.println();
 
+        }
+    }
+
+    @Override
+    public void leerNAs(Tabla tabla) {
+        for (Columna col : tabla.columnas) {
+            int count = 0;
+            for (int i = 0; i < col.getCantidadFilas(); i++) {
+                Object val = col.getValor(i);
+                if (val == null || val.equals("NA")) {
+                    count++;
+                }
+            }
+            System.out.println("Columna " + col.getNombre() + " tiene " + count + " valores NA");
+        }
+    }
+
+    @Override
+    public void mostrarNAs(Tabla tabla) {
+        for (int i = 0; i < etiquetasFilas.size(); i++) {
+            for (Columna col : tabla.columnas) {
+                Object val = col.getValor(i);
+                if (val == null || val.equals("NA")) {
+                    System.out.println("NA en fila " + etiquetasFilas.get(i) + ", columna " + col.getNombre());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato {
+        for (Columna col : tabla.columnas) {
+            if (!col.esValorValido(valor)) {
+                throw new ExcepcionesTabla.ExcepcionTipoDato(col.getTipoDeDato(), valor);
+            }
+            for (int i = 0; i < col.getCantidadFilas(); i++) {
+                Object val = col.getValor(i);
+                if (val == null || val.equals("NA")) {
+                    try {
+                        col.setCelda(i, valor);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public Tabla seleccionarColumnas(List<String> nombresColumnas) throws ExcepcionesTabla.ExcepcionColumnaInexistente, ExcepcionesTabla.ExcepcionTipoDato {
+        List<Columna> nuevasColumnas = new ArrayList<>();
+        List<String> nuevasEtiquetasColumnas = new ArrayList<>();
+
+        for (String nombre : nombresColumnas) {
+            Columna colEncontrada = null;
+            for (Columna c : columnas) {
+                if (c.getNombre().equals(nombre)) {
+                    colEncontrada = c;
+                    break;
+                }
+            }
+            if (colEncontrada == null) {
+                throw new ExcepcionesTabla.ExcepcionColumnaInexistente(nombre);
+            }
+            // Copiar columna completa (nombre, tipo y celdas)
+            Columna copiaCol = new Columna(colEncontrada.getNombre(), colEncontrada.getTipoDeDato(), colEncontrada.obtenerCeldas());
+            nuevasColumnas.add(copiaCol);
+            nuevasEtiquetasColumnas.add(nombre);
+        }
+
+        // Mapa filas queda igual
+        Map<String, Integer> nuevoMapaFilas = new HashMap<>(this.mapaFilas);
+
+        // Crear mapaColumnas nuevo para las columnas seleccionadas
+        Map<String, Integer> nuevoMapaColumnas = new HashMap<>();
+        for (int i = 0; i < nuevasEtiquetasColumnas.size(); i++) {
+            nuevoMapaColumnas.put(nuevasEtiquetasColumnas.get(i), i);
+        }
+
+        // Crear y devolver nueva tabla
+        return new Tabla(this.nombreTabla, nuevasColumnas, new ArrayList<>(this.etiquetasFilas), nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+    }
+
+    private void actualizarMapaFilas() {
+        mapaFilas.clear();
+        for (int i = 0; i < etiquetasFilas.size(); i++) {
+            mapaFilas.put(etiquetasFilas.get(i), i);
+        }
+    }
+
+    private void actualizarMapaColumnas() {
+        mapaColumnas.clear();
+        for (int i = 0; i < etiquetasColumnas.size(); i++) {
+            mapaColumnas.put(etiquetasColumnas.get(i), i);
         }
     }
 }

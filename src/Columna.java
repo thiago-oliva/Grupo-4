@@ -59,7 +59,7 @@ public class Columna {
         celdas.add(new Celda(valor));
     }
 
-    private boolean esValorValido(Object valor) {
+    public boolean esValorValido(Object valor) {
         if (valor == null) return true;
         switch (tipo) {
             case NUMERICO:
@@ -81,7 +81,7 @@ public class Columna {
     }
 
     public List<Celda> obtenerCeldas() {
-        return celdas;
+        return new ArrayList<>(celdas);
     }
 
     //crea una nueva columna que contiene solo las primeras limite filas (celdas) de la columna original.
@@ -113,5 +113,11 @@ public class Columna {
             }
         }
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
+    }
+
+    // Para manejar los valores faltantes
+    public interface NAs {
+        boolean esNA(Object valor); // Para verificar si un valor es NA
+        void imputar(Object valor); // Reemplaza todos los NA por el valor dado
     }
 }

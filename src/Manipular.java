@@ -1,8 +1,8 @@
 import java.util.List;
 
 public interface Manipular {
-    void obtenerFila(String str);
-    void eliminarFila(String str);
-    void insertarColumna(int indice, List<String> nuevaColumna);
+    List<Object> obtenerFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada;
+    void eliminarFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada;
+    void insertarColumna(int indice, List<String> nuevaColumna) throws ExcepcionesTabla.ExcepcionLongitudColumna;
     void eliminarColumna(int indice);
 }
