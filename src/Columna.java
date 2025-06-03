@@ -1,20 +1,13 @@
 import java.util.List;
 import java.util.ArrayList;
 
-public class Columna {
+public class Columna<T> {
     private String nombre;
     private TipoDato tipo;
-    private List<Celda> celdas;
-
-    // Constructor para crear una columna con un nombre y tipo de dato
-    public Columna(String nombre, TipoDato tipo) {
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.celdas = new ArrayList<>();
-    }
+    private List<Celda<T>> celdas;
 
     // Constructor para crear una columna con un nombre, tipo de dato y una lista de celdas
-    public Columna(String nombre, TipoDato tipo, List<Celda> celdas) {
+    public Columna(String nombre, TipoDato tipo, List<Celda<T>> celdas) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.celdas = new ArrayList<>(celdas);
@@ -32,13 +25,13 @@ public class Columna {
         return celdas.size();
     }
 
-    public List<Celda> getCeldas() {
+    public List<Celda<T>> getCeldas() {
         return this.celdas;
     }
 
     // Obtiene el valor de una celda en una fila específica
     // Si la fila es inválida, lanza una excepción
-    public Object getValor(int filaIndex) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+    public T getValor(int filaIndex) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (filaIndex < 0 || filaIndex >= celdas.size()) {
             throw new ExcepcionesTabla.ExcepcionIndiceInvalido(filaIndex);
         }
@@ -56,7 +49,7 @@ public class Columna {
 
     // Establece el valor de una celda en una fila específica
     // Si la fila es inválida o el valor no es del tipo correcto, lanza una excepción
-    public void setCelda(int fila, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato,
+    public void setCelda(int fila, T valor) throws ExcepcionesTabla.ExcepcionTipoDato,
             ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
             throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
@@ -64,16 +57,16 @@ public class Columna {
         if (!esValorValido(valor)) {
             throw new ExcepcionesTabla.ExcepcionTipoDato(tipo, valor);
         }
-        celdas.set(fila, new Celda(valor));
+        celdas.set(fila, new Celda<>(valor));
     }
 
     // Agrega una nueva celda al final de la columna
     // Si el valor no es del tipo correcto, lanza una excepción
-    public void agregarCelda(Object valor) throws ExcepcionesTabla.ExcepcionTipoDato {
+    public void agregarCelda(T valor) throws ExcepcionesTabla.ExcepcionTipoDato {
         if (!esValorValido(valor)) {
             throw new ExcepcionesTabla.ExcepcionTipoDato(tipo, valor);
         }
-        celdas.add(new Celda(valor));
+        celdas.add(new Celda<>(valor));
     }
 
     // chequea si el valor es válido según el tipo de dato de la columna
@@ -100,41 +93,41 @@ public class Columna {
     }
 
     // Obtiene una lista de todas las celdas de la columna
-    public List<Celda> obtenerCeldas() {
+    public List<Celda<T>> obtenerCeldas() {
         return new ArrayList<>(celdas);
     }
 
     //crea una nueva columna que contiene solo las primeras limite filas (celdas) de la columna original.
-    public Columna copiarPrimerasFilas(int limite) {
-        List<Celda> nuevasCeldas = new ArrayList<>();
+    public Columna<T> copiarPrimerasFilas(int limite) {
+        List<Celda<T>> nuevasCeldas = new ArrayList<>();
         for (int i = 0; i < limite && i < celdas.size(); i++) {
-            nuevasCeldas.add(new Celda(celdas.get(i).getValor()));
+            nuevasCeldas.add(new Celda<>(celdas.get(i).getValor()));
         }
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
     }
 
     // crea una nueva columna que contiene las últimas filas (celdas) de la columna original.
-    public Columna copiarUltimasFilas(int cantidad) {
+    public Columna<T> copiarUltimasFilas(int cantidad) {
         int total = celdas.size();
         int desde = Math.max(0, total - cantidad);
-        List<Celda> nuevasCeldas = new ArrayList<>();
+        List<Celda<T>> nuevasCeldas = new ArrayList<>();
         for (int i = desde; i < total; i++) {
-            nuevasCeldas.add(new Celda(celdas.get(i).getValor()));
+            nuevasCeldas.add(new Celda<>(celdas.get(i).getValor()));
         }
-        return new Columna(this.nombre, this.tipo, nuevasCeldas);
+        return new Columna<>(this.nombre, this.tipo, nuevasCeldas);
     }
 
     // copia filas específicas de la columna original según los índices proporcionados
-    public Columna copiarFilasPorIndices(List<Integer> indices) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
-        List<Celda> nuevasCeldas = new ArrayList<>();
+    public Columna<T> copiarFilasPorIndices(List<Integer> indices) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+        List<Celda<T>> nuevasCeldas = new ArrayList<>();
         for (int i : indices) {
             if (i >= 0 && i < celdas.size()) {
-                nuevasCeldas.add(new Celda(celdas.get(i).getValor()));
+                nuevasCeldas.add(new Celda<>(celdas.get(i).getValor()));
             } else {
                 throw new ExcepcionesTabla.ExcepcionIndiceInvalido(i);
             }
         }
-        return new Columna(this.nombre, this.tipo, nuevasCeldas);
+        return new Columna<>(this.nombre, this.tipo, nuevasCeldas);
     }
 
     // Método para verificar si un valor es NA
