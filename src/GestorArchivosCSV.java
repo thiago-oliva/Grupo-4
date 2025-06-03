@@ -1,47 +1,77 @@
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Arrays;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
+import java.io.*;
+import java.util.*;
 
 public class GestorArchivosCSV {
-    public GestorArchivosCSV() {
 
+    public static Tabla leerCSV(String ruta, char separador, boolean tieneEncabezado)
+            throws IOException, ExcepcionesTabla.ExcepcionTipoDato {
+
+        BufferedReader lector = new BufferedReader(new FileReader(ruta));
+        List<String[]> filasLeidas = new ArrayList<>();
+        String linea;
+
+        while ((linea = lector.readLine()) != null) {
+            filasLeidas.add(linea.split(Character.toString(separador), -1));
+        }
+        lector.close();
+
+        if (filasLeidas.isEmpty()) throw new IOException("Archivo vacío.");
+
+        int columnas = filasLeidas.get(0).length;
+        List<String> nombres = new ArrayList<>();
+
+        int desde = 0;
+        if (tieneEncabezado) {
+            nombres = Arrays.asList(filasLeidas.get(0));
+            desde = 1;
+        } else {
+            for (int i = 0; i < columnas; i++) nombres.add("col" + i);
+        }
+
+        List<Columna> listaColumnas = new ArrayList<>();
+        for (String nombre : nombres)
+            listaColumnas.add(new Columna(nombre, TipoDato.CADENA));
+
+        for (int i = desde; i < filasLeidas.size(); i++) {
+            String[] fila = filasLeidas.get(i);
+            for (int j = 0; j < columnas; j++) {
+                String val = j < fila.length ? fila[j] : "";
+                listaColumnas.get(j).agregarCelda(new Celda(val.equalsIgnoreCase("NA") ? null : val));
+            }
+        }
+
+        Tabla tabla = new Tabla("tabla"); // Usá el constructor que tengas disponible
+
+        for (Columna c : listaColumnas) {
+            tabla.insertarColumna(c); // Este método debe existir en tu clase Tabla
+        }
+
+        return tabla;
     }
 
-    public void leerCsv(String ruta) {
-        Path archivo = Paths.get(ruta);
-        try {
-            Files.lines(archivo).forEach(linea -> {
-                List<Object> fila = Arrays.asList(linea.split(","));
-                Tabla.agregarFila(fila); // Crear metodo agregarFila en clase Tabla
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void guardarEnCsv(Tabla tabla, String ruta) {
-        Path direccion = Paths.get(ruta);
-        StringBuilder contenido = new StringBuilder();
+    public static void guardarEnCSV(String ruta, char separador, boolean incluirEncabezado, Tabla tabla) throws IOException {
+        BufferedWriter escritor = new BufferedWriter(new FileWriter(ruta));
 
-        for (List<String> fila : tabla.getFilas()) {
-            contenido.append(String.join(",", fila));
-            contenido.append(System.lineSeparator());
+        int filas = tabla.getCantidadFilas();
+        int columnas = tabla.getCantidadColumnas();
+
+        if (incluirEncabezado) {
+            List<String> nombres = tabla.getEtiquetasColumnas();
+            escritor.write(String.join(Character.toString(separador), nombres));
+            escritor.newLine();
         }
 
-        try { //ver clase excepciones
-            Files.write(direccion, contenido.toString().getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            System.err.println("Error al guardar el archivo: " + e.getMessage());
+        for (int i = 0; i < filas; i++) {
+            List<String> fila = new ArrayList<>();
+            for (int j = 0; j < columnas; j++) {
+                Object valor = tabla.getCelda(i, j).getValor();
+                fila.add(valor == null ? "NA" : valor.toString());
+            }
+            escritor.write(String.join(Character.toString(separador), fila));
+            escritor.newLine();
         }
-    }
 
-
-    public void getMapa(Tabla tabla){
-//despues
+        escritor.close();
     }
 }

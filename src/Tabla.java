@@ -576,4 +576,6 @@ public class Tabla implements Manipular, NAs {
             mapaColumnas.put(etiquetasColumnas.get(i), i);
         }
     }
+
+
 }

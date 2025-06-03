@@ -41,7 +41,6 @@ public class GestorArchivosCSV {
     }
 
 
-    public void getMapa(Tabla tabla){
-//despues
-    }
+//    public void getMapa(Tabla tabla){
+//    }
 }
