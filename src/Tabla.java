@@ -514,7 +514,7 @@ public class Tabla implements Manipular, NAs {
         for (int i = 0; i < etiquetasFilas.size(); i++) {
             for (Columna col : tabla.columnas) {
                 Object val = col.getValor(i);
-                if (val == null || val.equals("NA")) {
+                if (Columna.esNA(val)) {
                     System.out.println("NA en fila " + etiquetasFilas.get(i) + ", columna " + col.getNombre());
                 }
             }
@@ -529,7 +529,7 @@ public class Tabla implements Manipular, NAs {
             }
             for (int i = 0; i < col.getCantidadFilas(); i++) {
                 Object val = col.getValor(i);
-                if (val == null || val.equals("NA")) {
+                if (Columna.esNA(val)) {
                     try {
                         col.setCelda(i, valor);
                     } catch (Exception e) {

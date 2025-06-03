@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 
-public class Columna implements NAs {
+public class Columna {
     private String nombre;
     private TipoDato tipo;
     private List<Celda> celdas;
@@ -138,7 +138,7 @@ public class Columna implements NAs {
     }
 
     // Método para verificar si un valor es NA
-    public boolean esNA(Object valor) {
+    public static boolean esNA(Object valor) {
         return valor == null || valor.equals("NA");
     }
 
@@ -151,52 +151,6 @@ public class Columna implements NAs {
             }
         }
         return count;
-    }
-    
-    // Implementación de la interfaz NAs
-    // Recorre y detecta valores nulos o faltantes por columna
-    @Override
-    public void leerNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
-        for (Columna columna : tabla.getColumnas()) {
-            for (int i = 0; i < columna.getCantidadFilas(); i++) {
-                Object valor = columna.getValor(i);
-                if (esNA(valor)) {
-                    System.out.println("Hay NAs en " + tabla.getNombreTabla() + " columna: " + columna.getNombre());
-                }
-                else {
-                    System.out.println("No hay NAs en " + tabla.getNombreTabla() + " columna: " + columna.getNombre());
-                }
-            }
-        }
-    }
-
-    // Muestra los NAs encontrados en la tabla
-    @Override
-    public void mostrarNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
-        for (Columna columna : tabla.getColumnas()) {
-            for (int i = 0; i < columna.getCantidadFilas(); i++) {
-                Object valor = columna.getValor(i);
-                if (esNA(valor)) {
-                    System.out.println("NA encontrado en columna '" + columna.getNombre() + "', fila " + i);
-                }
-            }
-        }
-    }
-
-    // Reemplaza todos los NAs en la tabla con el valor dado
-    @Override
-    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
-        for (Columna columna : tabla.getColumnas()) {
-            for (int i = 0; i < columna.getCantidadFilas(); i++) {
-                Object celdaValor = columna.getValor(i);
-                if (esNA(celdaValor)) {
-                    if (!columna.esValorValido(valor)) {
-                        throw new ExcepcionesTabla.ExcepcionTipoDato(columna.getTipoDeDato(), valor);
-                    }
-                    columna.setCelda(i, valor);
-                }
-            }
-        }
     }
 }
 
