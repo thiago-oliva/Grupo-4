@@ -44,6 +44,11 @@ public class Tabla implements Manipular, NAs {
         return new ArrayList<>(columnas);
     }
 
+    public int getCantidadFilas() {
+        if (columnas == null || columnas.isEmpty()) return 0;
+        return columnas.get(0).getCeldas().size();
+    }
+
     // Devuelve tipos de datos de columnas dadas (o todas si no se pasa lista/null)
     public List<TipoDato> getTiposColumnas(List<String> etiquetas) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada{
         List<TipoDato> tipos = new ArrayList<>();

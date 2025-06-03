@@ -30,6 +30,10 @@ public class Columna {
         return celdas.size();
     }
 
+    public List<Celda> getCeldas() {
+        return this.celdas;
+    }
+
     public Object getValor(int filaIndex) { //Me busca el indice de la
         return celdas.get(filaIndex).getValor();
     }
