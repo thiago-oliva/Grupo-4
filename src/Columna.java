@@ -6,12 +6,14 @@ public class Columna implements NAs {
     private TipoDato tipo;
     private List<Celda> celdas;
 
+    // Constructor para crear una columna con un nombre y tipo de dato
     public Columna(String nombre, TipoDato tipo) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.celdas = new ArrayList<>();
     }
 
+    // Constructor para crear una columna con un nombre, tipo de dato y una lista de celdas
     public Columna(String nombre, TipoDato tipo, List<Celda> celdas) {
         this.nombre = nombre;
         this.tipo = tipo;
@@ -34,10 +36,17 @@ public class Columna implements NAs {
         return this.celdas;
     }
 
-    public Object getValor(int filaIndex) { //Me busca el indice de la
+    // Obtiene el valor de una celda en una fila específica
+    // Si la fila es inválida, lanza una excepción
+    public Object getValor(int filaIndex) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+        if (filaIndex < 0 || filaIndex >= celdas.size()) {
+            throw new ExcepcionesTabla.ExcepcionIndiceInvalido(filaIndex);
+        }
         return celdas.get(filaIndex).getValor();
     }
 
+    // Obtiene la celda completa en una fila específica
+    // Si la fila es inválida, lanza una excepción
     public Celda getCelda(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
             throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
@@ -45,6 +54,8 @@ public class Columna implements NAs {
         return celdas.get(fila);
     }
 
+    // Establece el valor de una celda en una fila específica
+    // Si la fila es inválida o el valor no es del tipo correcto, lanza una excepción
     public void setCelda(int fila, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato,
             ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
@@ -56,6 +67,8 @@ public class Columna implements NAs {
         celdas.set(fila, new Celda(valor));
     }
 
+    // Agrega una nueva celda al final de la columna
+    // Si el valor no es del tipo correcto, lanza una excepción
     public void agregarCelda(Object valor) throws ExcepcionesTabla.ExcepcionTipoDato {
         if (!esValorValido(valor)) {
             throw new ExcepcionesTabla.ExcepcionTipoDato(tipo, valor);
@@ -63,6 +76,7 @@ public class Columna implements NAs {
         celdas.add(new Celda(valor));
     }
 
+    // chequea si el valor es válido según el tipo de dato de la columna
     public boolean esValorValido(Object valor) {
         if (valor == null) return true;
         switch (tipo) {
@@ -77,6 +91,7 @@ public class Columna implements NAs {
         }
     }
 
+    // Elimina una fila específica
     public void eliminarFila(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
             throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
@@ -84,6 +99,7 @@ public class Columna implements NAs {
         celdas.remove(fila);
     }
 
+    // Obtiene una lista de todas las celdas de la columna
     public List<Celda> obtenerCeldas() {
         return new ArrayList<>(celdas);
     }
@@ -97,6 +113,7 @@ public class Columna implements NAs {
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
     }
 
+    // crea una nueva columna que contiene las últimas filas (celdas) de la columna original.
     public Columna copiarUltimasFilas(int cantidad) {
         int total = celdas.size();
         int desde = Math.max(0, total - cantidad);
@@ -107,6 +124,7 @@ public class Columna implements NAs {
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
     }
 
+    // copia filas específicas de la columna original según los índices proporcionados
     public Columna copiarFilasPorIndices(List<Integer> indices) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         List<Celda> nuevasCeldas = new ArrayList<>();
         for (int i : indices) {
@@ -119,41 +137,59 @@ public class Columna implements NAs {
         return new Columna(this.nombre, this.tipo, nuevasCeldas);
     }
 
-    // Para manejar los valores faltantes
-    //public interface NAs {
-      //  boolean esNA(Object valor); // Para verificar si un valor es NA
-        //void imputar(Object valor); // Reemplaza todos los NA por el valor dado
-    //}
+    // Método para verificar si un valor es NA
+    public boolean esNA(Object valor) {
+        return valor == null || valor.equals("NA");
+    }
+
+    // Método para contar NAs en esta columna específica
+    public int contarNAs() throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+        int count = 0;
+        for (int i = 0; i < this.getCantidadFilas(); i++) {
+            if (esNA(this.getValor(i))) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    // Implementación de la interfaz NAs
+    // Recorre y detecta valores nulos o faltantes por columna
     @Override
-    public void leerNAs(Tabla tabla) {
+    public void leerNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (Columna columna : tabla.getColumnas()) {
             for (int i = 0; i < columna.getCantidadFilas(); i++) {
                 Object valor = columna.getValor(i);
-                if (valor == null || "NA".equals(valor) || "".equals(valor)) {
+                if (esNA(valor)) {
+                    System.out.println("Hay NAs en " + tabla.getNombreTabla() + " columna: " + columna.getNombre());
+                }
+                else {
+                    System.out.println("No hay NAs en " + tabla.getNombreTabla() + " columna: " + columna.getNombre());
+                }
+            }
+        }
+    }
+
+    // Muestra los NAs encontrados en la tabla
+    @Override
+    public void mostrarNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+        for (Columna columna : tabla.getColumnas()) {
+            for (int i = 0; i < columna.getCantidadFilas(); i++) {
+                Object valor = columna.getValor(i);
+                if (esNA(valor)) {
                     System.out.println("NA encontrado en columna '" + columna.getNombre() + "', fila " + i);
                 }
             }
         }
     }
 
-    @Override
-    public void mostrarNAs(Tabla tabla) {
-        for (Columna columna : tabla.getColumnas()) {
-            for (int i = 0; i < columna.getCantidadFilas(); i++) {
-                Object valor = columna.getValor(i);
-                if (valor == null || "NA".equals(valor) || "".equals(valor)) {
-                    System.out.println("NA encontrado en columna '" + columna.getNombre() + "', fila " + i);
-                }
-            }
-        }
-    }
-
+    // Reemplaza todos los NAs en la tabla con el valor dado
     @Override
     public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (Columna columna : tabla.getColumnas()) {
             for (int i = 0; i < columna.getCantidadFilas(); i++) {
                 Object celdaValor = columna.getValor(i);
-                if (celdaValor == null || "NA".equals(celdaValor) || "".equals(celdaValor)) {
+                if (esNA(celdaValor)) {
                     if (!columna.esValorValido(valor)) {
                         throw new ExcepcionesTabla.ExcepcionTipoDato(columna.getTipoDeDato(), valor);
                     }

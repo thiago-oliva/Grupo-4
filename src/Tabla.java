@@ -23,6 +23,11 @@ public class Tabla implements Manipular, NAs {
         this.mapaColumnas = new HashMap<>(mapaColumnas);
     }
 
+    // Devuelve el nombre de la Tabla
+    public String getNombreTabla() {
+        return nombreTabla;
+    }
+    
     // Devuelve la cantidad de columnas
     public int getCantidadColumnas() {
         return columnas.size();
@@ -39,8 +44,7 @@ public class Tabla implements Manipular, NAs {
     }
 
     // Devuelve copia de la lista de columnas
-    public List<Columna> getColumnas()
-    {
+    public List<Columna> getColumnas(){
         return new ArrayList<>(columnas);
     }
 
@@ -78,8 +82,9 @@ public class Tabla implements Manipular, NAs {
         return columnas.get(indice).obtenerCeldas();
     }
 
+    // Devuelve la fila completa (lista de valores) a partir de su etiqueta
     @Override
-    public List<Object> obtenerFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada {
+    public List<Object> obtenerFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (!mapaFilas.containsKey(etiqueta)) {
             throw new ExcepcionesTabla.ExcepcionFilaNoEncontrada(etiqueta);
         }
@@ -91,6 +96,7 @@ public class Tabla implements Manipular, NAs {
         return fila;
     }
 
+    // Elimina una fila dada su etiqueta, actualizando los índices de las filas restantes
     @Override
     public void eliminarFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada {
         if (!mapaFilas.containsKey(etiqueta)) {
@@ -112,6 +118,7 @@ public class Tabla implements Manipular, NAs {
         }
     }
 
+    // Inserta una nueva columna en la posición indicada, con los valores de la lista nuevaColumna
     @Override
     public void insertarColumna(int indice, List<String> nuevaColumna) throws ExcepcionesTabla.ExcepcionLongitudColumna {
         if (!columnas.isEmpty() && nuevaColumna.size() != columnas.get(0).getCantidadFilas()) {
@@ -132,6 +139,7 @@ public class Tabla implements Manipular, NAs {
         }
     }
 
+    // Elimina una columna en la posición indicada, actualizando los índices de las columnas restantes
     @Override
     public void eliminarColumna(int indice) {
         columnas.remove(indice);
@@ -184,6 +192,7 @@ public class Tabla implements Manipular, NAs {
         return new Tabla(this.nombreTabla + "_head", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
     }
 
+    // Devuelve una nueva tabla con las últimas x filas
     public Tabla tail(int x) {
         int totalFilas = etiquetasFilas.size(); // Total de filas actuales en la tabla
 
@@ -287,7 +296,7 @@ public class Tabla implements Manipular, NAs {
     // Recibe el nombre de la columna a filtrar y un predicado (condición) para filtrar los valores
     // Devuelve una nueva tabla con solo las filas donde la condición se cumple en esa columna.
     public Tabla filtrarColumnas(String nombreColumna, Predicate<Object> condicion)
-            throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionTipoDato {
+            throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
 
         // Buscar índice de la columna que se va a filtrar
         Integer indiceColumna = mapaColumnas.get(nombreColumna);
@@ -339,7 +348,7 @@ public class Tabla implements Manipular, NAs {
 
     // Recibe un Predicate<List<Object>> que representa la condición aplicada a toda la fila (lista de valores de esa fila).
     // Devuelve una nueva Tabla con solo las filas que cumplen esa condición.
-    public Tabla filtrarFilas(Predicate<List<Object>> condicion) {
+    public Tabla filtrarFilas(Predicate<List<Object>> condicion) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
         List<Columna> nuevasColumnas = new ArrayList<>();
@@ -466,7 +475,7 @@ public class Tabla implements Manipular, NAs {
 
     // Imprime por consola una representación tabular simple, mostrando las etiquetas de columnas arriba y
     // las filas con sus etiquetas a la izquierda
-    public void mostrar() {
+    public void mostrar() throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         // Imprimir encabezado con etiquetas de columnas
         System.out.print("Fila\\Col\t"); // espacio para etiqueta filas
         for (String etiquetaCol : etiquetasColumnas) {
@@ -489,22 +498,19 @@ public class Tabla implements Manipular, NAs {
         }
     }
 
+    // Implementación de la interfaz NAs
+    // Recorre y detecta valores nulos o faltantes por columna
     @Override
-    public void leerNAs(Tabla tabla) {
+    public void leerNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (Columna col : tabla.columnas) {
-            int count = 0;
-            for (int i = 0; i < col.getCantidadFilas(); i++) {
-                Object val = col.getValor(i);
-                if (val == null || val.equals("NA")) {
-                    count++;
-                }
-            }
+            int count = col.contarNAs();
             System.out.println("Columna " + col.getNombre() + " tiene " + count + " valores NA");
         }
     }
 
+    // Muestra los NAs encontrados en la tabla
     @Override
-    public void mostrarNAs(Tabla tabla) {
+    public void mostrarNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (int i = 0; i < etiquetasFilas.size(); i++) {
             for (Columna col : tabla.columnas) {
                 Object val = col.getValor(i);
@@ -516,7 +522,7 @@ public class Tabla implements Manipular, NAs {
     }
 
     @Override
-    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato {
+    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (Columna col : tabla.columnas) {
             if (!col.esValorValido(valor)) {
                 throw new ExcepcionesTabla.ExcepcionTipoDato(col.getTipoDeDato(), valor);
