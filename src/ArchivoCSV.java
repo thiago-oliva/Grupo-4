@@ -11,8 +11,8 @@ public class ArchivoCSV {
     }
 
 
-    public ArchivoCSV(Tabla tabla, String rutaDestino) { //Constructor que guarda una tabla en un archivo CSV.
-        guardarTablaEnCSV(tabla, rutaDestino);
+    public ArchivoCSV(Tabla tabla, String rutaDestino) { //Constructor que guarda una tabla en un archivo CSV. Recibe la tabla que se va a guardar.
+        guardarTablaEnCSV(tabla, rutaDestino); // Devuelve la ruta donde se guardará el archivo CSV.
     }
 
     public Map<String, List<Object>> getMap() { //Devuelve un mapa que contiene los nombres de las columnas y sus datos.
@@ -54,13 +54,8 @@ public class ArchivoCSV {
         }
     }
 
-    /**
-     * Convierte un dato de cadena de texto al tipo adecuado (Integer, Double, Boolean o String).
-     *
-     * @param dato El dato en forma de cadena de texto.
-     * @return El dato convertido al tipo adecuado o null si está vacío o es "NA".
-     */
-    private Object convertirDato(String dato) {
+
+    private Object convertirDato(String dato) { //Convierte un dato de cadea de texto al tipo adecuado (Integer, Double, Boolean o String) o null si está vacío o es "NA".
         if (dato.isEmpty() || dato.equalsIgnoreCase("NA")) {
             return null;
         }
@@ -84,7 +79,7 @@ public class ArchivoCSV {
     }
 
 
-    public void guardarTablaEnCSV(Tabla tabla, String archivoDestino) {
+    public void guardarTablaEnCSV(Tabla tabla, String archivoDestino) { //Recibe la tabla cuyos datos se van a guardar y devuelve la ruta donde se guardará el archivo CSV.
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivoDestino))) {
             // Escribir la cabecera con los nombres de las columnas
             for (int i = 0; i < tabla.getColumnas().size(); i++) {
