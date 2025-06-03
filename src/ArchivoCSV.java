@@ -98,7 +98,7 @@ public class ArchivoCSV {
             // Escribir cada fila de datos
             for (int fila = 0; fila < tabla.getCantidadFilas(); fila++) {
                 for (int col = 0; col < tabla.getColumnas().size(); col++) {
-                    Columna<?> columna = tabla.getColumnas().get(col);
+                    Columna columna = tabla.getColumnas().get(col);
                     Object valor = columna.getCeldas().get(fila).getValor();
                     writer.write(valor != null ? valor.toString() : ""); // Manejo de valores nulos
 
