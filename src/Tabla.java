@@ -152,18 +152,9 @@ public class Tabla implements Manipular, NAs {
     }
 
 
-    // Devuelve una celda específica dada la etiqueta de fila y columna
-    public Celda getCelda(String etiquetaFila, String etiquetaColumna) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
-        int fila = mapaFilas.get(etiquetaFila);
-        int columna = mapaColumnas.get(etiquetaColumna);
+    //Devuelve la celda ubicada en la fila y la columna de la tabla.
+    public Celda getCelda(int fila, int columna) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         return columnas.get(columna).getCelda(fila);
-    }
-
-    // Modifica el valor de una celda específica (accedida por etiquetas)
-    public void setCelda(String etiquetaFila, String etiquetaColumna, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
-        int fila = mapaFilas.get(etiquetaFila);
-        int columna = mapaColumnas.get(etiquetaColumna);
-        columnas.get(columna).setCelda(fila, valor);
     }
 
     //SELECCIONAR PREGUNTAR
