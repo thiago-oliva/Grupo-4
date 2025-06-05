@@ -40,7 +40,7 @@ public class Columna<T> {
 
     // Obtiene la celda completa en una fila específica
     // Si la fila es inválida, lanza una excepción
-    public Celda getCelda(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+    public Celda<T> getCelda(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
             throw new ExcepcionesTabla.ExcepcionIndiceInvalido(fila);
         }
@@ -103,7 +103,7 @@ public class Columna<T> {
         for (int i = 0; i < limite && i < celdas.size(); i++) {
             nuevasCeldas.add(new Celda<>(celdas.get(i).getValor()));
         }
-        return new Columna(this.nombre, this.tipo, nuevasCeldas);
+        return new Columna<>(this.nombre, this.tipo, nuevasCeldas);
     }
 
     // crea una nueva columna que contiene las últimas filas (celdas) de la columna original.
