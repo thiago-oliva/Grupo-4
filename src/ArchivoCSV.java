@@ -72,7 +72,7 @@ public class ArchivoCSV<T> {
     }
 
     // Guarda una tabla en un archivo CSV
-    public void guardarTablaEnCSV(Tabla<T> tabla, String archivoDestino) { //Recibe la tabla cuyos datos se van a guardar y devuelve la ruta donde se guardará el archivo CSV.
+    public void guardarTablaEnCSV(Tabla<?> tabla, String archivoDestino) { //Recibe la tabla cuyos datos se van a guardar y devuelve la ruta donde se guardará el archivo CSV.
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivoDestino))) {
             // Cabecera
             for (int i = 0; i < tabla.getColumnas().size(); i++) {
@@ -84,8 +84,8 @@ public class ArchivoCSV<T> {
             // Filas
             for (int fila = 0; fila < tabla.getCantidadFilas(); fila++) {
                 for (int col = 0; col < tabla.getColumnas().size(); col++) {
-                    Columna<T> columna = tabla.getColumnas().get(col);
-                    T valor = columna.getCeldas().get(fila).getValor();
+                    Columna<?> columna = tabla.getColumnas().get(col);
+                    ? valor = columna.getCeldas().get(fila).getValor();
                     writer.write(valor != null ? valor.toString() : "");
                     if (col < tabla.getColumnas().size() - 1) writer.write(",");
                 }
