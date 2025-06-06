@@ -154,7 +154,7 @@ public class Tabla implements Manipular, NAs {
         return columnas.get(columna).getCelda(fila);
     }
 
-    public List<List<Celda<?>>> seleccionar(List<String> nombresColumnas, List<Integer> indicesFilas)
+    public List<List<Celda<?>>> seleccionar(List<String> nombresColumnas, List<String> columnas)
             throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido {
 
         List<List<Celda<?>>> vista = new ArrayList<>();
