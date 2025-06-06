@@ -1,5 +1,5 @@
 //Con generics
-public class Celda<T> {
+public class    Celda<T> {
     private T valor;
 
     public Celda(T valor) {

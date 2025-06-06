@@ -20,6 +20,7 @@ public class ArchivoCSV<T> {
 
     // Devuelve el mapa con los datos por columna
     public Map<String, List<Celda<T>>> getMap() {
+
         return columnas;
     }
 
