@@ -14,7 +14,7 @@ public class Tabla implements Manipular, NAs {
     private Map<String, Integer> mapaFilas;// Cada nombre de lista (por ejemplo "Nombre" o "Edad") está asociado a su posición (índice) en la lista filas
     private Map<String, Integer> mapaColumnas;//Igual que arriba
 
-    public Tabla(String nombreTabla, List<Columna> columnas, List<String> etiquetasFilas, List<String> etiquetasColumnas, Map<String, Integer> mapaFilas, Map<String, Integer> mapaColumnas) {
+    public Tabla(String nombreTabla, List<Columna<?>> columnas, List<String> etiquetasFilas, List<String> etiquetasColumnas, Map<String, Integer> mapaFilas, Map<String, Integer> mapaColumnas) {
         this.nombreTabla = nombreTabla;
         this.columnas = new ArrayList<>(columnas);
         this.etiquetasFilas = new ArrayList<>(etiquetasFilas);
@@ -58,7 +58,7 @@ public class Tabla implements Manipular, NAs {
         List<TipoDato> tipos = new ArrayList<>();
         if (etiquetas == null || etiquetas.isEmpty()) {
             // Si no se pasan etiquetas, devuelve los tipos de todas las columnas
-            for (Columna columna : columnas) {
+            for (Columna<?> columna : columnas) {
                 tipos.add(columna.getTipoDeDato());
             }
         } else {
@@ -202,8 +202,8 @@ public class Tabla implements Manipular, NAs {
         }
 
         // Crear nuevas columnas copiando solo las últimas 'limite' filas
-        List<Columna> nuevasColumnas = new ArrayList<>();
-        for (Columna columna : columnas) {
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
+        for (Columna<?> columna : columnas) {
             // Usamos el método de Columna que copia las últimas filas
             nuevasColumnas.add(columna.copiarUltimasFilas(limite));
         }
@@ -227,8 +227,8 @@ public class Tabla implements Manipular, NAs {
 
         // Validar que nombres y tipos de columnas coincidan
         for (int i = 0; i < columnas.size(); i++) {
-            Columna col1 = this.columnas.get(i);
-            Columna col2 = otra.getColumnas().get(i);
+            Columna<?> col1 = this.columnas.get(i);
+            Columna<?> col2 = otra.getColumnas().get(i);
 
             if (!col1.getNombre().equals(col2.getNombre()) ||
                     col1.getTipoDeDato() != col2.getTipoDeDato()) {
@@ -240,7 +240,7 @@ public class Tabla implements Manipular, NAs {
         }
 
         // Crear nuevas listas
-        List<Columna> nuevasColumnas = new ArrayList<>();
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
 
@@ -254,17 +254,14 @@ public class Tabla implements Manipular, NAs {
 
         // Concatenar columnas
         for (int i = 0; i < columnas.size(); i++) {
-            Columna col1 = this.columnas.get(i);
-            Columna col2 = otra.getColumnas().get(i);
+            Columna<?> col1 = this.columnas.get(i);
+            Columna<?> col2 = otra.getColumnas().get(i);
 
-            List<Celda> celdasConcatenadas = new ArrayList<>();
-            celdasConcatenadas.addAll(col1.obtenerCeldas());
-            celdasConcatenadas.addAll(col2.obtenerCeldas());
-
-            // Crear nueva columna con las celdas
-            Columna nuevaColumna = new Columna(col1.getNombre(), col1.getTipoDeDato(), celdasConcatenadas);
+            // Hacemos un cast seguro (suponiendo que los tipos coinciden)
+            Columna<?> nuevaColumna = ((Columna) col1).concatenar((Columna) col2);
             nuevasColumnas.add(nuevaColumna);
         }
+
 
         // Las columnas y su mapa se mantienen
         List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
@@ -272,13 +269,8 @@ public class Tabla implements Manipular, NAs {
 
         // Crear nueva tabla
         return new Tabla(
-                this.nombreTabla + "_concatenada",
-                nuevasColumnas,
-                nuevasEtiquetasFilas,
-                nuevasEtiquetasColumnas,
-                nuevoMapaFilas,
-                nuevoMapaColumnas
-        );
+                this.nombreTabla + "_concatenada", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas,
+                nuevoMapaFilas, nuevoMapaColumnas);
     }
 
     // Recibe el nombre de la columna a filtrar y un predicado (condición) para filtrar los valores
@@ -294,11 +286,11 @@ public class Tabla implements Manipular, NAs {
 
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
-        List<Columna> nuevasColumnas = new ArrayList<>();
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
 
         // Crear columnas vacías correspondientes a cada columna original
-        for (Columna columna : columnas) {
-            nuevasColumnas.add(new Columna(columna.getNombre(), columna.getTipoDeDato(), new ArrayList<>()));
+        for (Columna<?> columna : columnas) {
+            nuevasColumnas.add(new Columna<>(columna.getNombre(), columna.getTipoDeDato(), new ArrayList<>()));
         }
 
         int nuevoIndiceFila = 0;
@@ -311,11 +303,10 @@ public class Tabla implements Manipular, NAs {
                 nuevoMapaFilas.put(etiquetaFila, nuevoIndiceFila);
 
                 for (int j = 0; j < columnas.size(); j++) {
-                    Columna colOriginal = columnas.get(j);
-                    Columna colNueva = nuevasColumnas.get(j);
-                    colNueva.agregarCelda(colOriginal.getValor(i)); // Puede lanzar ExcepcionTipoDato
+                    Columna<?> colOriginal = columnas.get(j);
+                    Columna<?> colNueva = nuevasColumnas.get(j);
+                    ((Columna) colNueva).agregarCelda(colOriginal.getValor(i)); // Puede lanzar ExcepcionTipoDato
                 }
-
                 nuevoIndiceFila++;
             }
         }
@@ -324,14 +315,8 @@ public class Tabla implements Manipular, NAs {
         List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
 
-        return new Tabla(
-                this.nombreTabla + "_filtrado",
-                nuevasColumnas,
-                nuevasEtiquetasFilas,
-                nuevasEtiquetasColumnas,
-                nuevoMapaFilas,
-                nuevoMapaColumnas
-        );
+        return new Tabla(this.nombreTabla + "_filtrado", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas,
+                nuevoMapaFilas, nuevoMapaColumnas);
     }
 
 
@@ -341,12 +326,12 @@ public class Tabla implements Manipular, NAs {
     public Tabla filtrarFilas(Predicate<List<Object>> condicion) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         List<String> nuevasEtiquetasFilas = new ArrayList<>();
         Map<String, Integer> nuevoMapaFilas = new HashMap<>();
-        List<Columna> nuevasColumnas = new ArrayList<>();
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
 
         // Inicializar nuevas columnas vacías (con mismo nombre y tipo)
-        for (Columna columna : columnas) {
+        for (Columna<?> columna : columnas) {
             // Cambié columna.getTipo() por columna.getTipoDeDato() para coincidir con tu diseño
-            nuevasColumnas.add(new Columna(columna.getNombre(), columna.getTipoDeDato(), new ArrayList<>()));
+            nuevasColumnas.add(new Columna<>(columna.getNombre(), columna.getTipoDeDato(), new ArrayList<>()));
         }
 
         int nuevoIndiceFila = 0;
@@ -355,7 +340,7 @@ public class Tabla implements Manipular, NAs {
         for (int i = 0; i < totalFilas; i++) {
             // Construir la fila i como lista de valores
             List<Object> filaValores = new ArrayList<>();
-            for (Columna columna : columnas) {
+            for (Columna<?> columna : columnas) {
                 filaValores.add(columna.getValor(i));
             }
 
@@ -367,23 +352,24 @@ public class Tabla implements Manipular, NAs {
 
                 // Copiar las celdas correspondientes de cada columna
                 for (int j = 0; j < columnas.size(); j++) {
-                    Columna colOriginal = columnas.get(j);
-                    Columna colNueva = nuevasColumnas.get(j);
+                    Columna<?> colOriginal = columnas.get(j);
+                    Columna<?> colNueva = nuevasColumnas.get(j);
+                    Object valor = colOriginal.getValor(i);
                     try {
-                        colNueva.agregarCelda(colOriginal.getValor(i));
+                        Columna<Object> colNuevaCasteada = (Columna<Object>) colNueva;
+                        colNuevaCasteada.agregarCelda(valor);
                     } catch (ExcepcionesTabla.ExcepcionTipoDato e) {
-                        System.out.println("Error al agregar celda en filtrarFilas: " + e.getMessage());
+                        System.out.println("Error al agregar celda: " + e.getMessage());
                     }
                 }
                 nuevoIndiceFila++;
             }
         }
-
         // Las etiquetas y mapa de columnas se mantienen igual
         List<String> nuevasEtiquetasColumnas = new ArrayList<>(etiquetasColumnas);
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
-
-        return new Tabla(this.nombreTabla + "_filtradoFilas", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+        return new Tabla(this.nombreTabla + "_filtradoFilas", nuevasColumnas, nuevasEtiquetasFilas,
+                nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
     }
 
     // Crea una nueva tabla con los mismos datos (columnas, filas, etiquetas, mapas), pero nuevas instancias
@@ -398,12 +384,13 @@ public class Tabla implements Manipular, NAs {
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(this.mapaColumnas);
 
         // Copiar columnas (copiar todas las filas de cada columna)
-        List<Columna> nuevasColumnas = new ArrayList<>();
-        for (Columna columna : this.columnas) {
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
+        for (Columna<?> columna : this.columnas) {
             // Podrías usar copiarPrimerasFilas con el tamaño completo de filas
             nuevasColumnas.add(columna.copiarPrimerasFilas(columna.getCantidadFilas()));
         }
-        return new Tabla(this.nombreTabla + "_copia", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+        return new Tabla(this.nombreTabla + "_copia", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas,
+                nuevoMapaFilas, nuevoMapaColumnas);
     }
 
     // Devuelve una nueva tabla con n filas elegidas al azar (sin reemplazo) de la tabla original.
@@ -443,8 +430,8 @@ public class Tabla implements Manipular, NAs {
         }
 
         // Crear nuevas columnas copiando solo las filas seleccionadas
-        List<Columna> nuevasColumnas = new ArrayList<>();
-        for (Columna columna : columnas) {
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
+        for (Columna<?> columna : columnas) {
             nuevasColumnas.add(columna.copiarFilasPorIndices(indicesSeleccionados));
         }
 
@@ -453,14 +440,8 @@ public class Tabla implements Manipular, NAs {
         Map<String, Integer> nuevoMapaColumnas = new HashMap<>(mapaColumnas);
 
         // Devolver nueva tabla con muestreo aleatorio
-        return new Tabla(
-                this.nombreTabla + "_muestreoAleatorio",
-                nuevasColumnas,
-                nuevasEtiquetasFilas,
-                nuevasEtiquetasColumnas,
-                nuevoMapaFilas,
-                nuevoMapaColumnas
-        );
+        return new Tabla(this.nombreTabla + "_muestreoAleatorio", nuevasColumnas, nuevasEtiquetasFilas,
+                nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
     }
 
     // Imprime por consola una representación tabular simple, mostrando las etiquetas de columnas arriba y
@@ -492,7 +473,7 @@ public class Tabla implements Manipular, NAs {
     // Recorre y detecta valores nulos o faltantes por columna
     @Override
     public void leerNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
-        for (Columna col : tabla.columnas) {
+        for (Columna<?> col : tabla.columnas) {
             int count = col.contarNAs();
             System.out.println("Columna " + col.getNombre() + " tiene " + count + " valores NA");
         }
@@ -502,7 +483,7 @@ public class Tabla implements Manipular, NAs {
     @Override
     public void mostrarNAs(Tabla tabla) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (int i = 0; i < etiquetasFilas.size(); i++) {
-            for (Columna col : tabla.columnas) {
+            for (Columna<?> col : tabla.columnas) {
                 Object val = col.getValor(i);
                 if (Columna.esNA(val)) {
                     System.out.println("NA en fila " + etiquetasFilas.get(i) + ", columna " + col.getNombre());
@@ -512,8 +493,9 @@ public class Tabla implements Manipular, NAs {
     }
 
     @Override
-    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato, ExcepcionesTabla.ExcepcionIndiceInvalido {
-        for (Columna col : tabla.columnas) {
+    public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato,
+            ExcepcionesTabla.ExcepcionIndiceInvalido {
+        for (Columna<?> col : tabla.columnas) {
             if (!col.esValorValido(valor)) {
                 throw new ExcepcionesTabla.ExcepcionTipoDato(col.getTipoDeDato(), valor);
             }
@@ -521,7 +503,7 @@ public class Tabla implements Manipular, NAs {
                 Object val = col.getValor(i);
                 if (Columna.esNA(val)) {
                     try {
-                        col.setCelda(i, valor);
+                        ((Columna) col).setCelda(i, valor);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -530,13 +512,14 @@ public class Tabla implements Manipular, NAs {
         }
     }
 
-    public Tabla seleccionarColumnas(List<String> nombresColumnas) throws ExcepcionesTabla.ExcepcionColumnaInexistente, ExcepcionesTabla.ExcepcionTipoDato {
-        List<Columna> nuevasColumnas = new ArrayList<>();
+    public Tabla seleccionarColumnas(List<String> nombresColumnas) throws ExcepcionesTabla.ExcepcionColumnaInexistente,
+            ExcepcionesTabla.ExcepcionTipoDato {
+        List<Columna<?>> nuevasColumnas = new ArrayList<>();
         List<String> nuevasEtiquetasColumnas = new ArrayList<>();
 
         for (String nombre : nombresColumnas) {
-            Columna colEncontrada = null;
-            for (Columna c : columnas) {
+            Columna<?> colEncontrada = null;
+            for (Columna<?> c : columnas) {
                 if (c.getNombre().equals(nombre)) {
                     colEncontrada = c;
                     break;
@@ -546,7 +529,7 @@ public class Tabla implements Manipular, NAs {
                 throw new ExcepcionesTabla.ExcepcionColumnaInexistente(nombre);
             }
             // Copiar columna completa (nombre, tipo y celdas)
-            Columna copiaCol = new Columna(colEncontrada.getNombre(), colEncontrada.getTipoDeDato(), colEncontrada.obtenerCeldas());
+            Columna<?> copiaCol = new Columna<>(colEncontrada.getNombre(), colEncontrada.getTipoDeDato(), colEncontrada.obtenerCeldas());
             nuevasColumnas.add(copiaCol);
             nuevasEtiquetasColumnas.add(nombre);
         }
@@ -561,7 +544,8 @@ public class Tabla implements Manipular, NAs {
         }
 
         // Crear y devolver nueva tabla
-        return new Tabla(this.nombreTabla, nuevasColumnas, new ArrayList<>(this.etiquetasFilas), nuevasEtiquetasColumnas, nuevoMapaFilas, nuevoMapaColumnas);
+        return new Tabla(this.nombreTabla, nuevasColumnas, new ArrayList<>(this.etiquetasFilas), nuevasEtiquetasColumnas,
+                nuevoMapaFilas, nuevoMapaColumnas);
     }
 
     private void actualizarMapaFilas() {
@@ -578,13 +562,15 @@ public class Tabla implements Manipular, NAs {
         }
     }
 
-    public List<List<Celda>> seleccionar(List<String> nombresColumnas, List<Integer> indicesFilas) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido{
-        List<List<Celda>> vista = new ArrayList<>();
-        List<Columna> columnasSeleccionadas = new ArrayList<>();
+    public List<List<Celda<?>>> seleccionar(List<String> nombresColumnas, List<Integer> indicesFilas)
+            throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada, ExcepcionesTabla.ExcepcionIndiceInvalido {
+
+        List<List<Celda<?>>> vista = new ArrayList<>();
+        List<Columna<?>> columnasSeleccionadas = new ArrayList<>();
 
         for (String nombre : nombresColumnas) {
             boolean encontrada = false;
-            for (Columna col : columnas) {
+            for (Columna<?> col : columnas) {
                 if (col.getNombre().equals(nombre)) {
                     columnasSeleccionadas.add(col);
                     encontrada = true;
@@ -603,8 +589,8 @@ public class Tabla implements Manipular, NAs {
                 throw new ExcepcionesTabla.ExcepcionIndiceInvalido(filaIndex);
             }
 
-            List<Celda> filaVista = new ArrayList<>();
-            for (Columna col : columnasSeleccionadas) {
+            List<Celda<?>> filaVista = new ArrayList<>();
+            for (Columna<?> col : columnasSeleccionadas) {
                 filaVista.add(col.getCeldas().get(filaIndex));
             }
             vista.add(filaVista);
@@ -612,6 +598,7 @@ public class Tabla implements Manipular, NAs {
 
         return vista;
     }
+
 
 
 

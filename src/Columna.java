@@ -145,5 +145,11 @@ public class Columna<T> {
         }
         return count;
     }
+
+    public Columna<T> concatenar(Columna<T> otra) {
+        List<Celda<T>> celdasConcatenadas = new ArrayList<>(this.celdas);
+        celdasConcatenadas.addAll(otra.celdas);
+        return new Columna<>(this.nombre, this.tipo, celdasConcatenadas);
+    }
 }
 
