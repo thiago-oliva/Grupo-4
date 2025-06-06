@@ -334,7 +334,7 @@ public class Tabla implements Manipular, NAs {
         );
     }
 
-    ppp
+
 
     // Recibe un Predicate<List<Object>> que representa la condición aplicada a toda la fila (lista de valores de esa fila).
     // Devuelve una nueva Tabla con solo las filas que cumplen esa condición.
