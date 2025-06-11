@@ -84,6 +84,32 @@ public class Columna<T> {
         }
     }
 
+    public static TipoDato inferirTipo(List<Object> valores) {
+        boolean esNumerico = true;
+        boolean esBooleano = true;
+
+        for (Object val : valores) {
+            if (val == null) continue;
+            String str = val.toString();
+
+            // Verificamos booleano
+            if (!(str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false"))) {
+                esBooleano = false;
+            }
+
+            // Verificamos numérico
+            try {
+                Double.parseDouble(str);
+            } catch (NumberFormatException e) {
+                esNumerico = false;
+            }
+        }
+
+        if (esNumerico) return TipoDato.NUMERICO;
+        if (esBooleano) return TipoDato.BOOLEANO;
+        return TipoDato.CADENA;
+    }
+
     // Elimina una fila específica
     public void eliminarFila(int fila) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         if (fila < 0 || fila >= celdas.size()) {
