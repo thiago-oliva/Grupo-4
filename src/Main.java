@@ -1,43 +1,31 @@
-import java.util.*;
-import java.util.function.Predicate;
-
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
-
     public static void main(String[] args) {
         try {
-            // Ruta del archivo CSV de entrada
-            String rutaEntrada = "C:\\Users\\Usuario\\Downloads\\EJEMPLO.csv";
+            ArchivoCSV lector = new ArchivoCSV("C:\\Users\\Usuario\\Downloads\\EJEMPLO.csv");
+            Tabla tabla = new Tabla(lector.getMap());
 
-            // Crear instancia de ArchivoCSV para leer datos
-            ArchivoCSV lector = new ArchivoCSV(rutaEntrada);
+            // Obtener tipos de todas las columnas (pasando null)
+            List<TipoDato> tipos = tabla.getTiposColumnas(null);
 
-            // Obtener el mapa con los datos leídos
-            Map<String, List<Celda<?>>> datos = lector.getMap();
-
-            // Mostrar datos leídos por columna
-            System.out.println("Datos leídos del archivo CSV:");
-            for (String columna : datos.keySet()) {
-                System.out.print(columna + ": ");
-                List<Celda<?>> celdas = datos.get(columna);
-                for (Celda<?> celda : celdas) {
-                    System.out.print(celda.getValor() + " ");
-                }
-                System.out.println();
+            System.out.println("Tipos de todas las columnas:");
+            for (int i = 0; i < tipos.size(); i++) {
+                System.out.println("Columna " + i + ": " + tipos.get(i));
             }
 
-            // Guardar los datos en otro archivo CSV
-            String rutaSalida = "C:\\Users\\Usuario\\Downloads\\EJEMPLO_SALIDA.csv";
+            // Ejemplo con columnas específicas
+            List<String> columnasDeseadas = Arrays.asList("Nombre", "Edad");
+            List<TipoDato> tiposFiltrados = tabla.getTiposColumnas(columnasDeseadas);
 
-            // Crear un objeto Tabla temporal a partir de los datos para usar el método guardaTabla
-            Tabla tablaTemporal = new Tabla(datos);
+            System.out.println("\nTipos de columnas seleccionadas:");
+            for (int i = 0; i < columnasDeseadas.size(); i++) {
+                System.out.println(columnasDeseadas.get(i) + ": " + tiposFiltrados.get(i));
+            }
 
-            ArchivoCSV archivoEscritor = new ArchivoCSV(tablaTemporal, rutaSalida);
-
-            System.out.println("\nDatos guardados en: " + rutaSalida);
-
+        } catch (ExcepcionesTabla.ExcepcionColumnaNoEncontrada e) {
+            System.err.println("Error: Columna no encontrada - " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
