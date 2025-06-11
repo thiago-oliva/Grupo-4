@@ -4,7 +4,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         try {
-            ArchivoCSV lector = new ArchivoCSV("C:\\Users\\Usuario\\Downloads\\EJEMPLO.csv");
+            ArchivoCSV lector = new ArchivoCSV("C:\\Users\\anton\\Downloads\\EJEMPLO.csv");
             Tabla tabla = new Tabla(lector.getMap());
 
             // Obtener tipos de todas las columnas (pasando null)
