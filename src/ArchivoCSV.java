@@ -21,7 +21,7 @@ public class ArchivoCSV {
     }
 
     // Cargar datos desde archivo CSV
-    private void cargarDatos(String archivoCSV) {
+    public void cargarDatos(String archivoCSV) {
         String linea;
         String separador = ",";
 

@@ -53,6 +53,34 @@ public class Tabla implements Manipular, NAs {
         return columnas.get(0).getCeldas().size();
     }
 
+
+    // Constructor vacío
+    public Tabla() {
+        this.columnas = new ArrayList<>();
+    }
+
+    // Constructor que recibe un Map<String, List<Celda<?>>>
+    public Tabla(Map<String, List<Celda<?>>> datos) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
+        columnas = new ArrayList<>();
+        for (Map.Entry<String, List<Celda<?>>> entry : datos.entrySet()) {
+            String nombreColumna = entry.getKey();
+            List<Celda<?>> celdasGenericas = entry.getValue();
+
+            // Inferir el TipoDato, o asumir CADENA por defecto (mejor agregar lógica)
+            TipoDato tipo = TipoDato.CADENA;
+
+            // Convertir List<Celda<?>> a List<Celda<Object>> para Columna<Object>
+            List<Celda<Object>> celdas = new ArrayList<>();
+            for (Celda<?> celda : celdasGenericas) {
+                celdas.add(new Celda<>((Object) celda.getValor()));
+            }
+
+            // Crear columna con nombre, tipo y lista de celdas
+            Columna<Object> columna = new Columna<>(nombreColumna, tipo, celdas);
+            columnas.add(columna);
+        }
+    }
+
     // Devuelve tipos de datos de columnas dadas (o todas si no se pasa lista/null)
     public List<TipoDato> getTiposColumnas(List<String> etiquetas) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada{
         List<TipoDato> tipos = new ArrayList<>();
