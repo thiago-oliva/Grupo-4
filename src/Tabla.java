@@ -62,6 +62,10 @@ public class Tabla implements Manipular, NAs {
     // Constructor que recibe un Map<String, List<Celda<?>>>
     public Tabla(Map<String, List<Celda<?>>> datos) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         columnas = new ArrayList<>();
+        mapaColumnas = new HashMap<>();
+        etiquetasColumnas = new ArrayList<>();
+
+        int index = 0;
         for (Map.Entry<String, List<Celda<?>>> entry : datos.entrySet()) {
             String nombreColumna = entry.getKey();
             List<Celda<?>> celdasGenericas = entry.getValue();
@@ -78,6 +82,11 @@ public class Tabla implements Manipular, NAs {
             // Crear columna con nombre, tipo y lista de celdas
             Columna<Object> columna = new Columna<>(nombreColumna, tipo, celdas);
             columnas.add(columna);
+
+            // Agregar al mapa y a etiquetas
+            mapaColumnas.put(nombreColumna, index);
+            etiquetasColumnas.add(nombreColumna);
+            index++;
         }
     }
 
