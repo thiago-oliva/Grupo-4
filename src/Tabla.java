@@ -43,6 +43,14 @@ public class Tabla implements Manipular, NAs {
         return new ArrayList<>(etiquetasColumnas);
     }
 
+    public Columna<?> getColumna(String nombreColumna) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada {
+        Integer index = mapaColumnas.get(nombreColumna);
+        if (index == null || index < 0 || index >= columnas.size()) {
+            throw new ExcepcionesTabla.ExcepcionColumnaNoEncontrada(nombreColumna);
+        }
+        return columnas.get(index);
+    }
+
     // Devuelve copia de la lista de columnas
     public List<Columna<?>> getColumnas() {
         return new ArrayList<>(columnas);
@@ -54,24 +62,46 @@ public class Tabla implements Manipular, NAs {
     }
 
 
-    // Constructor vacío
-    public Tabla() {
-        this.columnas = new ArrayList<>();
-    }
-
     // Constructor que recibe un Map<String, List<Celda<?>>>
     public Tabla(Map<String, List<Celda<?>>> datos) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         columnas = new ArrayList<>();
-        mapaColumnas = new HashMap<>();
         etiquetasColumnas = new ArrayList<>();
+        etiquetasFilas = new ArrayList<>();
+        mapaColumnas = new HashMap<>();
+        mapaFilas = new HashMap<>();
 
         int index = 0;
         for (Map.Entry<String, List<Celda<?>>> entry : datos.entrySet()) {
             String nombreColumna = entry.getKey();
             List<Celda<?>> celdasGenericas = entry.getValue();
 
-            // Inferir el TipoDato, o asumir CADENA por defecto (mejor agregar lógica)
-            TipoDato tipo = TipoDato.CADENA;
+            // Inferir el tipo de dato de la columna
+            boolean esNumerico = true;
+            boolean esBooleano = true;
+
+            for (Celda<?> celda : celdasGenericas) {
+                Object valor = celda.getValor();
+                if (valor == null) continue;
+                String str = valor.toString().trim();
+
+                // Verificar si es booleano
+                if (!str.equalsIgnoreCase("true") && !str.equalsIgnoreCase("false")) {
+                    esBooleano = false;
+                }
+
+                // Verificar si es numérico
+                try {
+                    Double.parseDouble(str);
+                } catch (NumberFormatException e) {
+                    esNumerico = false;
+                }
+            }
+
+            // Estimar tipo según la lógica
+            TipoDato tipo;
+            if (esBooleano) tipo = TipoDato.BOOLEANO;
+            else if (esNumerico) tipo = TipoDato.NUMERICO;
+            else tipo = TipoDato.CADENA;
 
             // Convertir List<Celda<?>> a List<Celda<Object>> para Columna<Object>
             List<Celda<Object>> celdas = new ArrayList<>();
@@ -591,12 +621,13 @@ public class Tabla implements Manipular, NAs {
     public void reemplazarNAs(Tabla tabla, Object valor) throws ExcepcionesTabla.ExcepcionTipoDato,
             ExcepcionesTabla.ExcepcionIndiceInvalido {
         for (Columna<?> col : tabla.columnas) {
-            if (!col.esValorValido(valor)) {
-                throw new ExcepcionesTabla.ExcepcionTipoDato(col.getTipoDeDato(), valor);
-            }
             for (int i = 0; i < col.getCantidadFilas(); i++) {
                 Object val = col.getValor(i);
                 if (Columna.esNA(val)) {
+                    // Verificamos SOLO si realmente vamos a insertar
+                    if (!col.esValorValido(valor)) {
+                        throw new ExcepcionesTabla.ExcepcionTipoDato(col.getTipoDeDato(), valor);
+                    }
                     try {
                         ((Columna) col).setCelda(i, valor);
                     } catch (Exception e) {
