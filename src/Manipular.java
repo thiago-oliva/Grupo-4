@@ -5,5 +5,5 @@ public interface Manipular {
     void eliminarFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada;
     void insertarColumna(int indice, List<String> nuevaColumna) throws ExcepcionesTabla.ExcepcionLongitudColumna;
     void eliminarColumna(int indice);
-
+    void insertarFila(List<Object> valores) throws ExcepcionesTabla.ExcepcionTipoDato;;
 }

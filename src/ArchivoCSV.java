@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class ArchivoCSV<T> {
+public class ArchivoCSV {
     private Map<String, List<Celda<?>>> columnas;
 
     // Constructor para cargar datos desde archivo CSV

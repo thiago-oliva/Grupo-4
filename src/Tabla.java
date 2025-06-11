@@ -94,6 +94,26 @@ public class Tabla implements Manipular, NAs {
         return fila;
     }
 
+    // Inserta una nueva fila en la tabla con los valores dados, validando tipos y actualizando etiquetas e índices.
+    @Override
+    public void insertarFila(List<Object> valores) throws ExcepcionesTabla.ExcepcionTipoDato {
+        if (valores.size() != columnas.size()) {
+            throw new IllegalArgumentException("La cantidad de valores no coincide con la cantidad de columnas.");
+        }
+
+        for (int i = 0; i < columnas.size(); i++) {
+            Columna<?> columna = columnas.get(i);
+            Object valor = valores.get(i);
+
+            // Cast genérico para evitar problemas con el tipo
+            ((Columna<Object>) columna).agregarCelda(valor);
+        }
+
+        String nuevaEtiqueta = "F" + etiquetasFilas.size();
+        etiquetasFilas.add(nuevaEtiqueta);
+        mapaFilas.put(nuevaEtiqueta, etiquetasFilas.size() - 1);
+    }
+
     // Elimina una fila dada su etiqueta, actualizando los índices de las filas restantes
     @Override
     public void eliminarFila(String etiqueta) throws ExcepcionesTabla.ExcepcionFilaNoEncontrada {
@@ -599,6 +619,4 @@ public class Tabla implements Manipular, NAs {
             mapaColumnas.put(etiquetasColumnas.get(i), i);
         }
     }
-
-
 }
