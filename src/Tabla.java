@@ -43,6 +43,7 @@ public class Tabla implements Manipular, NAs {
         return new ArrayList<>(etiquetasColumnas);
     }
 
+    //Devuelve el contenido de una columna
     public Columna<?> getColumna(String nombreColumna) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada {
         Integer index = mapaColumnas.get(nombreColumna);
         if (index == null || index < 0 || index >= columnas.size()) {
@@ -62,7 +63,6 @@ public class Tabla implements Manipular, NAs {
     }
 
 
-    // Constructor que recibe un Map<String, List<Celda<?>>>
     public Tabla(Map<String, List<Celda<?>>> datos) throws ExcepcionesTabla.ExcepcionIndiceInvalido {
         columnas = new ArrayList<>();
         etiquetasColumnas = new ArrayList<>();
@@ -71,9 +71,15 @@ public class Tabla implements Manipular, NAs {
         mapaFilas = new HashMap<>();
 
         int index = 0;
+        int cantidadFilas = -1; // Se determina una sola vez
+
         for (Map.Entry<String, List<Celda<?>>> entry : datos.entrySet()) {
             String nombreColumna = entry.getKey();
             List<Celda<?>> celdasGenericas = entry.getValue();
+
+            if (cantidadFilas == -1) {
+                cantidadFilas = celdasGenericas.size(); // Solo la primera vez
+            }
 
             // Inferir el tipo de dato de la columna
             boolean esNumerico = true;
@@ -84,12 +90,10 @@ public class Tabla implements Manipular, NAs {
                 if (valor == null) continue;
                 String str = valor.toString().trim();
 
-                // Verificar si es booleano
                 if (!str.equalsIgnoreCase("true") && !str.equalsIgnoreCase("false")) {
                     esBooleano = false;
                 }
 
-                // Verificar si es numérico
                 try {
                     Double.parseDouble(str);
                 } catch (NumberFormatException e) {
@@ -103,20 +107,24 @@ public class Tabla implements Manipular, NAs {
             else if (esNumerico) tipo = TipoDato.NUMERICO;
             else tipo = TipoDato.CADENA;
 
-            // Convertir List<Celda<?>> a List<Celda<Object>> para Columna<Object>
+            // Convertir List<Celda<?>> a List<Celda<Object>>
             List<Celda<Object>> celdas = new ArrayList<>();
             for (Celda<?> celda : celdasGenericas) {
                 celdas.add(new Celda<>((Object) celda.getValor()));
             }
 
-            // Crear columna con nombre, tipo y lista de celdas
+            // Crear columna
             Columna<Object> columna = new Columna<>(nombreColumna, tipo, celdas);
             columnas.add(columna);
-
-            // Agregar al mapa y a etiquetas
-            mapaColumnas.put(nombreColumna, index);
             etiquetasColumnas.add(nombreColumna);
-            index++;
+            mapaColumnas.put(nombreColumna, index++);
+        }
+
+        // Generar etiquetas de fila una sola vez
+        for (int i = 0; i < cantidadFilas; i++) {
+            String etiqueta = "F" + i;
+            etiquetasFilas.add(etiqueta);
+            mapaFilas.put(etiqueta, i);
         }
     }
 
@@ -176,7 +184,13 @@ public class Tabla implements Manipular, NAs {
             ((Columna<Object>) columna).agregarCelda(valor);
         }
 
-        String nuevaEtiqueta = "F" + etiquetasFilas.size();
+        // Generar etiqueta única
+        int contador = 0;
+        String nuevaEtiqueta;
+        do {
+            nuevaEtiqueta = "F" + contador++;
+        } while (mapaFilas.containsKey(nuevaEtiqueta));
+
         etiquetasFilas.add(nuevaEtiqueta);
         mapaFilas.put(nuevaEtiqueta, etiquetasFilas.size() - 1);
     }
