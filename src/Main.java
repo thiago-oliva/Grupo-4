@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             // Leer archivo CSV original
-            ArchivoCSV lector = new ArchivoCSV("C:\\Users\\anton\\Downloads\\EJEMPLO.csv");
+            ArchivoCSV lector = new ArchivoCSV("C://Users//USUARIO//Downloads//EJEMPLO.csv");
             Tabla tabla = new Tabla(lector.getMap());
 
             System.out.println("Etiquetas de filas:");
@@ -62,7 +62,7 @@ public class Main {
             }
 
             // Guardar la tabla modificada
-            String rutaDestino = "C:\\Users\\anton\\Downloads\\EJEMPLO_MODIFICADO.csv";
+            String rutaDestino = "C://Users//USUARIO//Downloads//EJEMPLO_MODIFICADO.csv";
             ArchivoCSV escritor = new ArchivoCSV(rutaDestino);
             escritor.guardarTablaEnCSV(tabla, rutaDestino);
             System.out.println("Archivo CSV guardado en: " + rutaDestino);
@@ -96,8 +96,8 @@ public class Main {
             }
 
             // Leer dos archivos distintos para concatenar
-            ArchivoCSV lector1 = new ArchivoCSV("C:\\Users\\anton\\Downloads\\EJEMPLO.csv");
-            ArchivoCSV lector2 = new ArchivoCSV("C:\\Users\\anton\\Downloads\\EJEMPLO2.csv");
+            ArchivoCSV lector1 = new ArchivoCSV("C://Users//USUARIO//Downloads//EJEMPLO.csv");
+            ArchivoCSV lector2 = new ArchivoCSV("C://Users//USUARIO//Downloads//EJEMPLO2.csv");
 
             // Crear tablas con los datos de esos archivos
             Tabla tabla1 = new Tabla(lector1.getMap());
@@ -107,7 +107,7 @@ public class Main {
             Tabla tablaConcatenada = tabla1.concatenar(tabla2);
 
             // Guardar la tabla concatenada en otro archivo
-            String rutaDestinoConcat = "C:\\Users\\anton\\Downloads\\EJEMPLO_CONCATENADO.csv";
+            String rutaDestinoConcat = "C://Users//USUARIO//Downloads//EJEMPLO_CONCATENADO.csv";
             ArchivoCSV escritorConcat = new ArchivoCSV(rutaDestinoConcat);
             escritorConcat.guardarTablaEnCSV(tablaConcatenada, rutaDestinoConcat);
 
@@ -146,6 +146,199 @@ public class Main {
             for (String etiquetaFila : tablaFiltradaFilas.getEtiquetasFilas()) {
                 System.out.println(etiquetaFila + ": " + tablaFiltradaFilas.obtenerFila(etiquetaFila));
             }
+            
+            // Prueba de Copia 
+            System.out.println("\n=== Probando Copia ===");
+
+            // Crear una copia de la tabla
+            Tabla tablaCopia = tabla.copiar();
+            System.out.println("\nTabla copiada:");
+
+            // Mostrar las etiquetas de filas de la copia
+            System.out.println("Etiquetas de filas de la copia:");
+            System.out.println(tablaCopia.getEtiquetasFilas());
+
+            // Mostrar el contenido de una fila específica en la copia (por ejemplo, F1)
+            System.out.println("\nContenido de la fila F1 en la copia:");
+            System.out.println(tablaCopia.obtenerFila("F1"));
+
+            // Mostrar todas las filas de la copia para verificar que los datos son idénticos
+            System.out.println("\nContenido completo de la tabla copiada:");
+            for (String etiqueta : tablaCopia.getEtiquetasFilas()) {
+                System.out.println(etiqueta + ": " + tablaCopia.obtenerFila(etiqueta));
+            }
+
+            // Modificar algo en la copia y verificar que no afecta a la original
+            tablaCopia.eliminarFila("F1"); // Eliminar F1 en la copia
+
+            // Mostrar el contenido de una fila específica en la copia 
+            System.out.println("\nContenido de la fila F2 en la copia:");
+            System.out.println(tablaCopia.obtenerFila("F2"));
+            // Mostrar el contenido de una fila específica en la original
+            System.out.println("\nContenido de la fila F2 en la tabla original:");
+            System.out.println(tabla.obtenerFila("F2"));
+
+
+            // Prueba Muestreo Aleatorio
+
+            // Probar muestreo aleatorio
+            System.out.println("\n=== Probando muestreo aleatorio ===");
+            
+            // Mostrar la tabla original completa
+            System.out.println("\nTabla original:");
+            tabla.mostrar();
+            
+            // Realizar muestreo aleatorio de n filas 
+            // int n = 5; error no puede ser mayor a la cant filas de tabla
+            // int n = -2; error debe ser positivo
+            // int n = 0; error debe ser positivo
+            int n = 3; // Número de filas a muestrear
+            Tabla tablaMuestreada = tabla.muestreoAleatorio(n);
+            
+            // Mostrar la tabla muestreada
+            System.out.println("\nTabla muestreada (" + n + " filas aleatorias):");
+            tablaMuestreada.mostrar();
+            
+            // Verificar que la tabla muestreada tiene el número correcto de filas
+            System.out.println("\nNúmero de filas en tabla muestreada: " + tablaMuestreada.getEtiquetasFilas().size());
+
+
+            // Prueba Metodos de Columna
+            System.out.println("\n=== Probando Métodos de Columna ===");
+
+            System.out.println("\n=== Probando copiarPrimerasFilas() ===");
+
+            // Obtener una columna específica para probar (por ejemplo, "Edad")
+            String nombreColumna = "Edad";
+            int indiceColumna = tabla.getMapaColumnas().get(nombreColumna);
+            Columna<?> columnaOriginal = tabla.getColumnas().get(indiceColumna);
+            
+            System.out.println("\nContenido completo de la columna original (" + nombreColumna + "):");
+            for (int i = 0; i < columnaOriginal.getCantidadFilas(); i++) {
+                System.out.println("Fila " + i + ": " + columnaOriginal.getValor(i));
+            }
+            
+            // Crear una copia con las primeras 2 filas
+            int limite = 2;
+            Columna<?> columnaTruncada = columnaOriginal.copiarPrimerasFilas(limite);
+            
+            System.out.println("\nContenido de la columna truncada (primeras " + limite + " filas):");
+            for (int i = 0; i < columnaTruncada.getCantidadFilas(); i++) {
+                System.out.println("Fila " + i + ": " + columnaTruncada.getValor(i));
+            }
+            
+            // Verificar que la copia tiene el número correcto de filas
+            System.out.println("\nNúmero de filas en columna original: " + columnaOriginal.getCantidadFilas());
+            System.out.println("Número de filas en columna truncada: " + columnaTruncada.getCantidadFilas());
+            
+            // Verificar que la original no fue modificada
+            System.out.println("\n¿La columna original sigue intacta? " + 
+                (columnaOriginal.getCantidadFilas() > columnaTruncada.getCantidadFilas()));
+            
+            // Caso especial: límite mayor que el número de filas
+            int limiteGrande = columnaOriginal.getCantidadFilas() + 5;
+            Columna<?> columnaLimiteGrande = columnaOriginal.copiarPrimerasFilas(limiteGrande);
+            System.out.println("\nProbando con límite mayor que filas existentes (" + limiteGrande + "):");
+            System.out.println("Filas obtenidas: " + columnaLimiteGrande.getCantidadFilas());
+
+            //Prueba de copiarUltimasFilas
+            System.out.println("\n=== Probando copiarUltimasFilas() ===");
+    
+            // Seleccionar columna para la prueba (usando nombres descriptivos únicos)
+            String columnaPrueba = "Edad";
+            int posicionColumna = tabla.getMapaColumnas().get(columnaPrueba);
+            Columna<?> columnaBase = tabla.getColumnas().get(posicionColumna);
+            
+            System.out.println("\nDatos completos de la columna base (" + columnaPrueba + "):");
+            for (int indice = 0; indice < columnaBase.getCantidadFilas(); indice++) {
+                System.out.println("Registro " + indice + ": " + columnaBase.getValor(indice));
+            }
+            
+            // Crear copia reducida (últimos registros)
+            int ultimosRegistros = 2;
+            Columna<?> columnaRecortada = columnaBase.copiarUltimasFilas(ultimosRegistros);
+            
+            System.out.println("\nContenido de la columna recortada (últimos " + ultimosRegistros + " registros):");
+            for (int pos = 0; pos < columnaRecortada.getCantidadFilas(); pos++) {
+                System.out.println("Posición " + pos + ": " + columnaRecortada.getValor(pos));
+            }
+            
+            // Validar integridad de datos
+            System.out.println("\nTotal en columna base: " + columnaBase.getCantidadFilas());
+            System.out.println("Total en columna recortada: " + columnaRecortada.getCantidadFilas());
+            
+            System.out.println("\n¿La columna base permanece inalterada? " + 
+                (columnaBase.getCantidadFilas() > columnaRecortada.getCantidadFilas()));
+            
+            // Caso límite: solicitar más registros de los existentes
+            int registroExcedente = columnaBase.getCantidadFilas() + 3;
+            Columna<?> columnaMaxima = columnaBase.copiarUltimasFilas(registroExcedente);
+            System.out.println("\nPrueba con límite excedente (" + registroExcedente + "):");
+            System.out.println("Registros obtenidos: " + columnaMaxima.getCantidadFilas());
+            
+            // Caso cero registros
+            Columna<?> columnaVacia = columnaBase.copiarUltimasFilas(0);
+            System.out.println("\nPrueba con cero registros solicitados:");
+            System.out.println("Registros obtenidos: " + columnaVacia.getCantidadFilas());
+            
+            // Caso valor negativo
+            Columna<?> columnaInvalida = columnaBase.copiarUltimasFilas(-5);
+            System.out.println("\nPrueba con valor negativo:");
+            System.out.println("Registros obtenidos: " + columnaInvalida.getCantidadFilas());
+
+            // Prueba copiarFilasPorIndices
+            System.out.println("\n=== Probando copiarFilasPorIndices() ===");
+    
+            // Seleccionar columna para la prueba
+            String columnaSeleccionada = "Edad";
+            int posicionColumna2 = tabla.getMapaColumnas().get(columnaSeleccionada);
+            Columna<?> columnaReferencia = tabla.getColumnas().get(posicionColumna2);
+
+            System.out.println("\nContenido completo de la columna referencia (" + columnaSeleccionada + "):");
+            for (int idx = 0; idx < columnaReferencia.getCantidadFilas(); idx++) {
+                System.out.println("Índice " + idx + ": " + columnaReferencia.getValor(idx));
+            }
+            
+            // Caso 1: Copiar filas específicas (ej. índices 0 y 2)
+            List<Integer> indicesValidos = Arrays.asList(0, 2);
+            Columna<?> columnaFiltrada = columnaReferencia.copiarFilasPorIndices(indicesValidos);
+            
+            System.out.println("\nCaso 1 - Columnas copiadas (índices " + indicesValidos + "):");
+            for (int pos = 0; pos < columnaFiltrada.getCantidadFilas(); pos++) {
+                System.out.println("Posición " + pos + ": " + columnaFiltrada.getValor(pos));
+            }
+            
+            // Caso 2: Índice inválido (mayor al tamaño)
+            try {
+                List<Integer> indicesInvalidos = Arrays.asList(1, 99);
+                System.out.println("\nCaso 2 - Probando índice inválido:");
+                Columna<?> columnaInvalida2 = columnaReferencia.copiarFilasPorIndices(indicesInvalidos);
+            } catch (ExcepcionesTabla.ExcepcionIndiceInvalido e) {
+                System.out.println("Correcto: Excepción capturada - " + e.getMessage());
+            }
+            
+            // Caso 3: Lista vacía de índices
+            List<Integer> indicesVacios = new ArrayList<>();
+            Columna<?> columnaVacia2 = columnaReferencia.copiarFilasPorIndices(indicesVacios);
+            System.out.println("\nCaso 3 - Lista vacía de índices:");
+            System.out.println("Registros obtenidos: " + columnaVacia2.getCantidadFilas());
+            
+            // Caso 4: Índice negativo
+            try {
+                List<Integer> indicesNegativos = Arrays.asList(-1, 2);
+                System.out.println("\nCaso 4 - Probando índice negativo:");
+                Columna<?> columnaNegativa = columnaReferencia.copiarFilasPorIndices(indicesNegativos);
+            } catch (ExcepcionesTabla.ExcepcionIndiceInvalido e) {
+                System.out.println("Correcto: Excepción capturada - " + e.getMessage());
+            }
+            
+            // Verificar integridad de la columna original
+            System.out.println("\nVerificación final:");
+            System.out.println("Total en columna referencia: " + columnaReferencia.getCantidadFilas());
+            System.out.println("¿Columna referencia permanece intacta? " + 
+                (columnaReferencia.getCantidadFilas() > columnaFiltrada.getCantidadFilas()));
+            
+            
 
         } catch (ExcepcionesTabla.ExcepcionColumnasIncompatibles e) {
             System.err.println("Columnas incompatibles: " + e.getMessage());
