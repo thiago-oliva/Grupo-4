@@ -24,6 +24,10 @@ public class Tabla implements Manipular, NAs {
         this.mapaColumnas = new HashMap<>(mapaColumnas);
     }
 
+    public Map<String, Integer> getMapaColumnas() {
+        return mapaColumnas;
+    }
+
     // Devuelve el nombre de la Tabla
     public String getNombreTabla() {
         return nombreTabla;
@@ -458,8 +462,6 @@ public class Tabla implements Manipular, NAs {
         return new Tabla(this.nombreTabla + "_filtrado", nuevasColumnas, nuevasEtiquetasFilas, nuevasEtiquetasColumnas,
                 nuevoMapaFilas, nuevoMapaColumnas);
     }
-
-
 
     // Recibe un Predicate<List<Object>> que representa la condición aplicada a toda la fila (lista de valores de esa fila).
     // Devuelve una nueva Tabla con solo las filas que cumplen esa condición.
