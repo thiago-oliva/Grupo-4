@@ -13,6 +13,7 @@ public class Tabla implements Manipular, NAs {
     private List<String> etiquetasColumnas;
     private Map<String, Integer> mapaFilas;// Cada nombre de lista (por ejemplo "Nombre" o "Edad") está asociado a su posición (índice) en la lista filas
     private Map<String, Integer> mapaColumnas;//Igual que arriba
+    private String nombreColumna;
 
     public Tabla(String nombreTabla, List<Columna<?>> columnas, List<String> etiquetasFilas, List<String> etiquetasColumnas, Map<String, Integer> mapaFilas, Map<String, Integer> mapaColumnas) {
         this.nombreTabla = nombreTabla;
@@ -219,18 +220,18 @@ public class Tabla implements Manipular, NAs {
 
     // Inserta una nueva columna en la posición indicada, con los valores de la lista nuevaColumna
     @Override
-    public void insertarColumna(int indice, List<String> nuevaColumna) throws ExcepcionesTabla.ExcepcionLongitudColumna {
+    public void insertarColumna(int indice, String nombreColumna,List<String> nuevaColumna) throws ExcepcionesTabla.ExcepcionLongitudColumna {
         if (!columnas.isEmpty() && nuevaColumna.size() != columnas.get(0).getCantidadFilas()) {
-            throw new ExcepcionesTabla.ExcepcionLongitudColumna("ColumnaNueva");
+            throw new ExcepcionesTabla.ExcepcionLongitudColumna(nombreColumna);
         }
         List<Celda<String>> celdas = new ArrayList<>();
         for (String val : nuevaColumna) {
             celdas.add(new Celda<>(val)); // Celda<String>
         }
 
-        Columna<String> nueva = new Columna<>("ColumnaNueva", TipoDato.CADENA, celdas);
+        Columna<String> nueva = new Columna<>(nombreColumna, TipoDato.CADENA, celdas);
         columnas.add(indice, nueva);
-        etiquetasColumnas.add(indice, "ColumnaNueva");
+        etiquetasColumnas.add(indice, nombreColumna);
 
         mapaColumnas.clear();
         for (int i = 0; i < etiquetasColumnas.size(); i++) {
