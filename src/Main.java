@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -5,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             // Leer archivo CSV
-            ArchivoCSV lector = new ArchivoCSV("C:\\Users\\Usuario\\Downloads\\EJEMPLO.csv");
+            ArchivoCSV lector = new ArchivoCSV("//Users/franciscoestevezsala.EJEMPLO.csv");
             Tabla tabla = new Tabla(lector.getMap());
 
             // Obtener una columna específica
@@ -31,9 +32,39 @@ public class Main {
             System.out.println("Valor modificado en fila 0: " + celdaModificada.getValor());
 
             // Guardar la tabla modificada en un nuevo archivo CSV
-            ArchivoCSV escritor = new ArchivoCSV();
+            ArchivoCSV escritor = new ArchivoCSV("C:\\Users\\Usuario\\Downloads\\EJEMPLO_MODIFICADO.csv");
             escritor.guardarTablaEnCSV(tabla, "C:\\Users\\Usuario\\Downloads\\EJEMPLO_MODIFICADO.csv");
             System.out.println("Archivo modificado guardado con éxito.");
+
+            // Elimina una columna
+            tabla.eliminarColumna(2);
+
+            // Busco primeras 2 filas
+            System.out.println(tabla.head(2));
+
+            // Selecciono primer y segunda fila y columna edad
+            List<String> columnasElegidas = new ArrayList<>();
+            columnasElegidas.add("Edad");
+            List<Integer> filasElegidas = new ArrayList<>();
+            filasElegidas.add(1);
+            filasElegidas.add(2);
+            tabla.seleccionar(columnasElegidas, filasElegidas);
+
+
+            // Busco ultimas 2 filas
+            System.out.println(tabla.tail(2));
+
+            // Filtra por mayores de edad
+            tabla.filtrarColumnas("Edad", valor ->
+            {return valor instanceof Integer && (Integer) valor >= 18;});
+
+
+            // Copia la tabla
+            Tabla copia = tabla.copiar();
+
+
+
+
 
         } catch (ExcepcionesTabla.ExcepcionIndiceInvalido e) {
             System.err.println("Error de índice: " + e.getMessage());
