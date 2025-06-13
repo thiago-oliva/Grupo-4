@@ -4,23 +4,23 @@ import java.util.*;
 public class ArchivoCSV {
     private Map<String, List<Celda<?>>> columnas;
 
-    // Constructor para cargar datos desde archivo CSV
+    // Constructor que carga datos desde un archivo CSV.
     public ArchivoCSV(String archivoCSV) {
         columnas = new LinkedHashMap<>();
         cargarDatos(archivoCSV);
     }
 
-    // Constructor para guardar una Tabla en un archivo CSV
+    // Constructor que guarda una tabla en un archivo CSV.
     public ArchivoCSV(Tabla tabla, String rutaDestino) {
         guardarTablaEnCSV(tabla, rutaDestino);
     }
 
-    // Devuelve el mapa con los datos por columna
+    // Devuelve el mapa con las columnas y sus celdas cargadas.
     public Map<String, List<Celda<?>>> getMap() {
         return columnas;
     }
 
-    // Cargar datos desde archivo CSV
+    // Carga datos desde un archivo CSV a la estructura interna de columnas.
     public void cargarDatos(String archivoCSV) {
         String linea;
         String separador = ",";
@@ -37,7 +37,7 @@ public class ArchivoCSV {
                 String[] datosFila = linea.split(separador);
                 int i = 0;
                 for (String nombreColumna : columnas.keySet()) {
-                    Celda<?> celda; // Cambio T por <?>
+                    Celda<?> celda;
                     if (i < datosFila.length) {
                         celda = new Celda<>(convertirDato(datosFila[i]));
                     } else {
@@ -52,7 +52,7 @@ public class ArchivoCSV {
         }
     }
 
-    // Convierte String a tipo apropiado (Integer, Double, Boolean o String)
+    // Convierte un String a un tipo de dato apropiado (Integer, Double, Boolean o String).
     private Object convertirDato(String dato) {
         if (dato == null || dato.isEmpty() || dato.equalsIgnoreCase("NA")) {
             return null;
@@ -68,18 +68,16 @@ public class ArchivoCSV {
         }
     }
 
-    // Guarda una tabla en un archivo CSV
-    //Recibe la tabla cuyos datos se van a guardar y devuelve la ruta donde se guardará el archivo CSV
+    // Guarda los datos de una Tabla en un archivo CSV en la ruta indicada.
     public void guardarTablaEnCSV(Tabla tabla, String archivoDestino) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(archivoDestino))) {
-            // Cabecera
+            // Cabecera.
             for (int i = 0; i < tabla.getColumnas().size(); i++) {
                 writer.write(tabla.getColumnas().get(i).getNombre());
                 if (i < tabla.getColumnas().size() - 1) writer.write(",");
             }
             writer.newLine();
-
-            // Filas
+            // Filas.
             for (int fila = 0; fila < tabla.getCantidadFilas(); fila++) {
                 for (int col = 0; col < tabla.getColumnas().size(); col++) {
                     Columna<?> columna = tabla.getColumnas().get(col);
