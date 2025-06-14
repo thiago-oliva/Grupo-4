@@ -616,7 +616,7 @@ public class Tabla implements Manipular, NAs {
     }
 
     // Devuelve una nueva tabla con solo las columnas cuyos nombres se pasan en la lista, validando que existan.
-    public Tabla seleccionarColumnas(List<String> nombresColumnas) throws ExcepcionesTabla.ExcepcionColumnaInexistente,
+    public Tabla seleccionarColumnas(List<String> nombresColumnas) throws ExcepcionesTabla.ExcepcionColumnaNoEncontrada,
             ExcepcionesTabla.ExcepcionTipoDato {
         List<Columna<?>> nuevasColumnas = new ArrayList<>();
         List<String> nuevasEtiquetasColumnas = new ArrayList<>();
@@ -630,7 +630,7 @@ public class Tabla implements Manipular, NAs {
                 }
             }
             if (colEncontrada == null) {
-                throw new ExcepcionesTabla.ExcepcionColumnaInexistente(nombre);
+                throw new ExcepcionesTabla.ExcepcionColumnaNoEncontrada(nombre);
             }
             // Copiar columna completa (nombre, tipo y celdas)
             Columna<?> copiaCol = new Columna<>(colEncontrada.getNombre(), colEncontrada.getTipoDeDato(), colEncontrada.obtenerCeldas());

@@ -69,11 +69,4 @@ public class ExcepcionesTabla {
                     nombreArchivo, razon));
         }
     }
-
-    // Excepción para cuando se solicita una columna inexistente por nombre.
-    public static class ExcepcionColumnaInexistente extends ExcepcionTabla {
-        public ExcepcionColumnaInexistente(String nombre) {
-            super("No existe la columna con nombre: " + nombre);
-        }
-    }
 }
